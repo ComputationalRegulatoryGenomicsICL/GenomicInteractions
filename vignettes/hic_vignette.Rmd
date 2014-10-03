@@ -1,0 +1,203 @@
+---
+title: "HiC vignette for GenomicInteractions package"
+output:
+  pdf_document: default
+  html_document:
+    keep_md: yes
+---
+
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{GenomicInteractions-HiC}
+-->
+
+```{r options, echo=FALSE}
+options("scipen"=10, "digits"=5)
+```
+
+## Introduction
+
+This vignette shows you how GenomicInteractions can be used to investigate significant interactions in HiC data that has been analysed using [HOMER](http://homer.salk.edu/homer/) software [1]. GenomicInteractions can take a HOMER [interaction file](http://homer.salk.edu/homer/interactions/HiCinteractions.html) as input. 
+
+The data we are using comes from [this paper](http://genome.cshlp.org/content/23/12/2066.full) [2] and can be downloaded from [GEO](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE48763). It is HiC data from wild type mouse double positive thymocytes. The experiment was carried out using the HindIII restriction enzyme, and the data was processed as described in the paper. HOMER software has been used to detect significant interactions at a resolution of 100kb. For the purposes of this vignette, we will consider only data from chromosomes 14 and 15.
+
+## Making a GenomicInteractions object
+
+Load the data by specifying the file location and experiment type. An experiment name and description are also required. A reference genome is required for constructing the GenomicInteractions object.
+
+```{r imports, warning=F, results="hide", message=FALSE}
+library(GenomicInteractions)
+library(BSgenome.Mmusculus.UCSC.mm9)
+```
+
+```{r}
+hic_file <- system.file("extdata", "Seitan2013_WT_100kb_interactions.txt", 
+                        package="GenomicInteractions")
+
+hic_data <- GenomicInteractions(hic_file, 
+                    type="homer", 
+                    experiment_name = "HiC 100kb", 
+                    description = "HiC 100kb resolution",
+                    gname="BSgenome.Mmusculus.UCSC.mm9")
+```
+
+The `GenomicInteractions` object consists of two linked `GenomicRanges` objects containing the anchors of each interaction, as well as the number of reads supporting each interaction. In addition, p-value and FDRs from the input file are stored. Note that importing data of type 'homer' will always give a warning `Name partially matched in data frame`. This is because the name of the column containing the calculated FDR will contain the total number of interactions, which will be different for each experiment, so we cannot match the column name exactly.
+
+We can check that the anchors are of the expected size (100kb).
+
+```{r }
+summary(width(anchorOne(hic_data)))
+summary(width(anchorTwo(hic_data)))
+hic_data
+```
+
+Some anchors are shorter than 100kb due to being at the end of a chromosome. There are `r length(hic_data)` interactions in total, with a total of `r sum(count(hic_data))` reads supporting them. To calculate the average number of reads per interaction, first use `count()` to get the count of reads supporting each individual interaction. 
+
+```{r}
+head(count(hic_data))
+mean(count(hic_data))
+```
+However, since we have FDR and p-values, it is probably more informative to look at these. 
+```{r}
+plot(density(pValue(hic_data)))
+plot(density(FDR(hic_data)))
+```
+
+We can subset the data based on FDR.
+
+```{r}
+sum(FDR(hic_data) < 0.1)
+hic_data_subset <- hic_data[FDR(hic_data) < 0.1]
+```
+
+## Summary statistics
+
+The package provides some functions to plot summary statistics of your data that may be of interest, such as the percentage of interactions that are in _cis_ or in _trans_, or the number of reads supporting each interaction.
+
+```{r}
+plotCisTrans(hic_data)
+plotCisTrans(hic_data_subset)
+
+plotCounts(hic_data, cut=30)
+plotCounts(hic_data_subset, cut=30)
+```
+
+Subsetting by FDR will tend to remove interactions that have less read support. _Trans_ interactions tend to have lower read support than _cis_ interactions, so the percentage of _trans_ interactions decreases. 
+
+## Annotation 
+
+One of the most powerful features of GenomicInteractions is that it allows you to annotate interactions by whether the anchors overlap genomic features of interest, such as promoters or enhancers. However this process can be slow for large datasets, so here we annotate with just promoters.
+
+Genome annotation data can be obtained from, for example UCSC databases using the GenomicFeatures package. We will use promoters of Refseq genes extended to a width of 5kb. Downloading all the data can be a slow process, so the data for promoters for chromosomes 14 and 15 is provided with this package.
+
+```{r eval=FALSE}
+## Not run
+library(GenomicFeatures)
+mm9.refseq.db <- makeTranscriptDbFromUCSC(genome="mm9", table="refGene")
+refseq.genes = genes(mm9.refseq.db)
+refseq.transcripts = transcriptsBy(mm9.refseq.db, by="gene")
+refseq.transcripts = refseq.transcripts[ names(refseq.transcripts) %in% unlist(refseq.genes$gene_id) ] 
+mm9_refseq_promoters <- promoters(refseq.transcripts, 2500,2500)
+mm9_refseq_promoters <- unlist(mm9_refseq_promoters[seqnames(mm9_refseq_promoters) %in% c("chr14", "chr15")])
+```
+`annotateInteractions` takes a list of features in GRanges or GRangesList format and annotates the interaction anchors based on overlap with these features. The list of annotation features should have descriptive names, as these names are stored in the annotated GenomicInteractions object and used to assign anchor (node) classes.
+
+```{r}
+data("mm9_refseq_promoters")
+
+annotation.features <- list(promoter = mm9_refseq_promoters)
+
+annotateInteractions(hic_data_subset, annotation.features)
+hic_data_subset
+```
+
+
+In addition, GRangesLists within the list of features should be named, and GRanges objects should have an "id" metadata column. These names or ids for each feature are stored in the metadata for the anchors of the GenomicInteractions object. As each anchor may overlap multiple promoters, the "promoter.id" column is stored as a list. Promoter ids can be accessed from the metadata of the anchors.
+
+
+```{r}
+anchorOne(hic_data_subset)
+head(anchorOne(hic_data_subset)$promoter.id)
+```
+
+## Node classes
+
+Node classes (or anchor classes) are assigned to each anchor based on overlap with annotation features and the order of those features within the list passed to the annotation function. If the list is `list(promoter=..., transcript=...)` then an anchor which overlaps both a promoter and a transcript will be given the node class "promoter". The features earlier in the list take priority. Any anchors which are not annotated with any of the given features will be assigned the class "distal". In this case we have only annotated with one type of feature, so all anchors are either "promoter" or "distal".
+
+As the anchors are large, most of them overlap at least one promoter.
+
+```{r}
+table(anchorOne(hic_data_subset)$node.class)
+table(anchorTwo(hic_data_subset)$node.class)
+```
+
+## Interaction types
+
+Interaction types are determined by the classes of the interacting nodes. As we only have two node classes, we have three possible interaction classes, summarised in the plot below. Most of the interactions are between promoters. We can subset the data to look at interaction types that are of particular interest.
+
+```{r }
+plotInteractionAnnotations(hic_data_subset)
+```
+
+To get all promoter--distal interactions:
+```{r}
+length(hic_data_subset[isInteractionType(hic_data_subset, "promoter", "distal")])
+```
+As this is a common type of interaction of interest, there is a function specifically for identifying these interactions (see the reference manual or `help(isInteractionType)` for additional built in interaction types). `isInteractionType` can be used with any pair of node classes. There are also functions for identifying _cis_ or _trans_ interactions.
+
+```{r}
+length(hic_data_subset[is.pd(hic_data_subset)])
+sum(is.trans(hic_data_subset))
+```
+
+To find the strongest promoter--distal interaction:
+```{r}
+hic_data_pd <- hic_data_subset[is.pd(hic_data_subset)]
+max(count(hic_data_pd))
+most_counts <- hic_data_pd[which.max(count(hic_data_pd))]
+most_counts
+```
+Or the most significant promoter--distal interaction:
+```{r}
+min(pValue(hic_data_pd))
+min_pval <- hic_data_pd[which.min(pValue(hic_data_pd))]
+min_pval
+```
+
+The distance between these interacting regions, or any interacting regions, can be found using `calculateDistances`. For _trans_ interactions the distance will be NA. 
+
+```{r }
+calculateDistances(most_counts, method="midpoint")
+calculateDistances(min_pval,method="midpoint")
+summary(calculateDistances(hic_data_subset,method="midpoint"))
+```
+
+## Virtual 4C plots
+
+There are functions available to plot a "virtual 4C" plot of all interactions with a given anchor or position, e.g. a promoter, or around a set of positions e.g. all promoters. The argument `flip = TRUE` can be used to flip coverage according to the strand of the region of interest. For example, the interactions around a set of promoters are plotted below. When `flip = TRUE` a slight bias towards downstream interactions is visible. This may be because of promoters interacting with the transcription termination site of the same gene or with intronic enhancers. 
+
+```{r}
+viewPoint(mm9_refseq_promoters[1], hic_data_subset, leftflank = 2000000, rightflank = 2000000)
+
+set.seed(42)
+promoter_subset <- sample(mm9_refseq_promoters, 20)
+viewPointAverage(promoter_subset, hic_data_subset, 
+                             leftflank = 1000000, rightflank = 1000000)
+viewPointAverage(promoter_subset, hic_data_subset, 
+                             leftflank = 1000000, rightflank = 1000000, flip = TRUE)
+```
+
+## Export to BED12 format
+
+The interactions can be exported to [BED12 format](http://bedtools.readthedocs.org/en/latest/content/general-usage.html) for viewing in a genome browser. Anchors are visualised as thick blocks connected by thinner interactions. 
+
+```{r, eval=FALSE}
+## Not run
+export.bed12(hic_data_subset, fn="hic_data_FDR0.1.bed")
+```
+
+## References
+
+1. Heinz S, Benner C, Spann N, Bertolino E et al. Simple Combinations of Lineage-Determining Transcription Factors Prime cis-Regulatory Elements Required for Macrophage and B Cell Identities. Mol Cell 2010 May 28;38(4):576-589.
+
+2. Seitan, V. C. et al. Cohesin-based chromatin interactions enable regulated gene expression within pre-existing architectural compartments. Genome Res. 23, 2066-77 (2013).

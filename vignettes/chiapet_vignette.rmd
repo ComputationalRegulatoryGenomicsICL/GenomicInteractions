@@ -1,0 +1,289 @@
+---
+title: "Package Vignette for Genomic Interactions: ChIA-PET data"
+output: 
+  pdf_document: default
+  html_document:
+    keep_md: TRUE
+---
+    
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{GenomicInteractions-ChIAPET}
+-->
+
+```{r global_chunk_opts, echo=F, include=F, eval=FALSE}
+library(knitr)
+opts_chunk$set(fig.width=12, fig.height=8)
+```
+
+## Imports
+
+First we need to load the GenomicInteractions package:
+
+```{r imports, warning=F, results="hide"}
+library(GenomicInteractions)
+library(BSgenome.Hsapiens.UCSC.hg19) 
+```
+
+We can then read in our data directly from the output of the 
+[**ChIA-PET tool**](http://genomebiology.com/2010/11/2/R22). At
+this stage we can also provide information about the cell type and a
+description tag for the experiment. The data is taken from Li et al., 2012, 
+published in [**Cell**](http://www.sciencedirect.com/science/article/pii/S0092867411015170).
+
+<!--
+The data is subsetted from the original to only include anchors on chromosomes 
+17 and 18. -->
+
+```{r load_data}
+chiapet.data = system.file("extdata/k562.rep1.cluster.pet3+.txt", 
+                           package="GenomicInteractions")
+
+k562.rep1 = GenomicInteractions(chiapet.data, 
+                                type="chiapet.tool", 
+                                experiment_name="k562", 
+                                description="k562 pol2 8wg16", 
+                                gname="BSgenome.Hsapiens.UCSC.hg19")
+```
+
+This loads the data into a `GenomicInteractions` object, which consists of two
+linked `GenomicRanges` objects containing the anchors in each interaction, as
+well as the p-value, FDR and the number of reads supporting each interaction.
+
+## GenomicInteractions Objects
+
+The metadata we have added can easily be accesed, and edited:
+
+```{r metadata}
+name(k562.rep1)
+genomeName(k562.rep1)
+description(k562.rep1) = "PolII-8wg16 Chia-PET for K562"
+```
+
+As can the data from the ChIA-PET experiment:
+
+```{r gi_data_access}
+head(count(k562.rep1))
+head(FDR(k562.rep1))
+hist(-log10(pValue(k562.rep1)))
+```
+
+The two linked `GRanges` object can be returned, but not altered:
+
+```{r anchor_access}
+anchorOne(k562.rep1)
+anchorTwo(k562.rep1)
+```
+
+`GenomicInteractions` objects can easily handle *trans*-chromosomal interactions, 
+since the anchors can be from any point along the chromosome. `is.trans` returns
+a logical vector, likewise `is.cis` is the opposite of this function.
+
+```{r trans}
+sprintf("Percentage of trans-chromosomal interactions %.2f", 
+        100*sum(is.trans(k562.rep1))/length(k562.rep1))
+```
+
+The length of each interaction is not stored as metadata, but we can calculate
+the distance of each interaction using either the inner edge, outer edge or
+midpoints of the anchors. This is undefined for inter-chromosomal interactions,
+so NA is returned, so it is important to exclude these interactions from some
+analyses.
+
+```{r short_range_interactions}
+head(calculateDistances(k562.rep1, method="midpoint"))
+```
+
+`GenomicRanges` objects can be subsetted by either integer or logical vectors like
+most R objects, and also BioConductor Rle objects. 
+
+```{r subsetting}
+k562.rep1[1:10] # first interactions in the dataset
+k562.rep1[sample(length(k562.rep1), 100)] # 100 interactions subsample
+k562.cis = k562.rep1[is.cis(k562.rep1)]
+k562.short = k562.cis[calculateDistances(k562.cis) < 1e6] # subset shorter interactions
+hist(calculateDistances(k562.short)) 
+```
+
+We can also subset based on the properties of the linked `GRanges` objects.
+
+```{r subset_chr}
+chrom = c("chr17", "chr18")
+sub = seqnames(anchorOne(k562.rep1)) %in% chrom & seqnames(anchorTwo(k562.rep1)) %in% chrom
+k562.rep1 = k562.rep1[sub]
+```
+
+## Annotation
+
+Since `GenomicInteractions` is based on `GenomicRanges`, it is very easy to
+interrogate `GenomicInteractions` objects using `GenomicRanges` data. In the
+example, we want to annotate interactions that overlap the promoters,
+transcription termination sites or the body of any gene. Since this can 
+be a time-consuming and data-heavy process, this example runs the analysis
+for only chromosomes 17 & 18.
+
+First we need the list of refseq transcripts:
+
+```{r annotation_features, eval=F}
+library(GenomicFeatures)
+
+hg19.refseq.db <- makeTranscriptDbFromUCSC(genome="hg19", table="refGene")
+refseq.genes = genes(hg19.refseq.db)
+refseq.transcripts = transcriptsBy(hg19.refseq.db, by="gene")
+non_pseudogene = names(refseq.transcripts) %in% unlist(refseq.genes$gene_id) 
+refseq.transcripts = refseq.transcripts[non_pseudogene] 
+```
+
+Rather than downloading the whole Refseq database, these are provided for
+chromosomes 17 & 18:
+
+```{r load_trascripts}
+data("hg19.refseq.transcripts")
+refseq.transcripts = hg19.refseq.transcripts
+```
+
+We can then use functions from `GenomicRanges` to call promoters and
+terminators for these transcripts. We have taken promoter regions to be within
+2.5kb of an annotated TSS and terminators to be within 1kb of the end of an
+annotated transcript. 
+
+Since genes can have multiple transcripts, they can also have multiple
+promoters/terminators, so these are `GRangesList` objects.
+
+```{r magic}
+refseq.promoters = promoters(refseq.transcripts, upstream=2500, downstream=2500)
+# unlist object so "strand" is one vector
+refseq.transcripts.ul = unlist(refseq.transcripts) 
+# terminators can be called as promoters with the strand reversed
+strand(refseq.transcripts.ul) = ifelse(strand(refseq.transcripts.ul) == "+", "-", "+") 
+refseq.terminators.ul = promoters(refseq.transcripts.ul, upstream=1000, downstream=1000) 
+# change back to original strand
+strand(refseq.terminators.ul) = ifelse(strand(refseq.terminators.ul) == "+", "-", "+") 
+# `relist' maintains the original names and structure of the list
+refseq.terminators = relist(refseq.terminators.ul, refseq.transcripts)
+```
+
+We can use these to subset our `GenomicInteractions` object directly from
+`GRanges` using the `GenomicRanges` overlaps methods. `findOverlaps` called on
+a `GenomicInteractions` object will return a list containing `Hits` objects for
+both anchors.
+
+We can finds any interactions involving a RefSeq promoter:
+
+```{r overlaps_methods}
+subsetByFeatures(k562.rep1, refseq.promoters)
+```
+
+However, one of the most powerful features in the `GenomicInteractions` package
+is the ability to annotate each anchor with a list of genomic regions and then
+summarise interactions according to these features. 
+
+The order in which we annotate the anchors is important, since each anchor can
+only have one `node.class`. The first listed take precedence. Any regions not
+overlapping ranges in `annotation.features` will be labelled with `distal`.
+
+
+```{r annotation}
+annotation.features = list(promoter=refseq.promoters, 
+                           terminator=refseq.terminators, 
+                           gene.body=refseq.transcripts)
+annotateInteractions(k562.rep1, annotation.features)
+annotationFeatures(k562.rep1)
+```
+
+We can now find promoters using the annotated `node.class` for each anchor:
+
+```{r node.class}
+p.one = anchorOne(k562.rep1)$node.class == "promoter"
+p.two = anchorTwo(k562.rep1)$node.class == "promoter"
+k562.rep1[p.one|p.two]
+```
+
+This information can be used to categorise interactions into promoter-distal,
+promoter-terminator etc. A table of interaction types can be generated with 
+`categoriseInteractions`:
+
+```{r categorise_interactions}
+categoriseInteractions(k562.rep1)
+```
+
+Alternatively, we can subset the object based on interaction type:
+
+```{r is_interaction_type}
+k562.rep1[isInteractionType(k562.rep1, "terminator", "gene.body")]
+```
+
+Common `node.class` values have shorter functions:
+
+```{r short_types, eval=F}
+k562.rep1[is.pp(k562.rep1)]
+k562.rep1[is.dd(k562.rep1)]
+k562.rep1[is.tt(k562.rep1)]
+```
+
+Summary plots of interactions classes can easily be produced:
+
+```{r interaction_classes}
+plotInteractionAnnotations(k562.rep1, other=5)
+```
+
+`viewpoints` will only take those interactions with a certain `node.class`:
+
+```{r promoter_classes}
+plotInteractionAnnotations(k562.rep1, other=5, viewpoints="promoter")
+```
+
+These are also combined in the function `plotSummaryStats`.
+
+## Feature Summaries
+
+The summariseByFeatures function summarises all interactions at a defined set
+of annotated loci.  In this example we use promoters, however any dataset can
+be used, for example transcription-factor ChIP data or predicted cis-regulatory
+sites.
+
+The categories are generated from the annotated categories in the object.
+
+```{r summarise}
+k562.rep1.promoter.annotation = summariseByFeatures(k562.rep1, refseq.promoters, 
+                                                    "promoter", distance.method="midpoint", 
+                                                    annotate.self=TRUE)
+colnames(k562.rep1.promoter.annotation)
+```
+
+This allows us to ask questions of the data, and provide a quick method to
+isolate genes of interest. In this case we produce lists of RefSeq IDs, which
+can easily be converted to EntrezIDs or gene symbols through existing
+BioConductor packages.
+
+Which promoters have the strongest Promoter-Promoter interactions?
+
+```{r p.p.interactions}
+i = order(k562.rep1.promoter.annotation$numberOfPromoterPromoterInteractions, 
+          decreasing=TRUE)[1:10]
+k562.rep1.promoter.annotation[i,"Promoter.id"]
+```
+
+Which promoters are contacting the largest number of distal elements?
+
+```{r enhancers}
+i = order(k562.rep1.promoter.annotation$numberOfUniquePromoterDistalInteractions, 
+          decreasing=TRUE)[1:10]
+k562.rep1.promoter.annotation[i,"Promoter.id"]
+```
+
+What percentage of promoters are in contact with transcription termination sites?
+
+```{r terminators}
+total = sum(k562.rep1.promoter.annotation$numberOfPromoterTerminatorInteractions > 0)
+sprintf("%.2f%% of promoters have P-T interactions", 100*total/nrow(k562.rep1.promoter.annotation))
+```
+
+## References
+1. Li, Guoliang, et al. "Software ChIA-PET tool for comprehensive chromatin
+   interaction analysis with paired-end tag sequencing." Genome Biol 11 (2010):
+   R22.
+
+2. Li, Guoliang, et al. "Extensive promoter-centered chromatin interactions
+   provide a topological basis for transcription regulation." Cell 148.1
+   (2012): 84-98
