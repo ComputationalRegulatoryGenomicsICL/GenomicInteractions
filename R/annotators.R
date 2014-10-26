@@ -271,7 +271,7 @@ setMethod("annotateInteractions", c("GenomicInteractions", "list"),
 #' @docType methods
 #' @import GenomicRanges
 #' @export
-setGeneric("summariseByFeatures",function(GIObject, features, feature.name, distance.method, annotate.self){standardGeneric ("summariseByFeatures")})
+setGeneric("summariseByFeatures",function(GIObject, features, feature.name, distance.method="midpoint", annotate.self=FALSE){standardGeneric ("summariseByFeatures")})
 #' @rdname summariseByFeatures
 #' @export
 setMethod("summariseByFeatures", "GenomicInteractions", 

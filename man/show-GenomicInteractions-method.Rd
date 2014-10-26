@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{A GenomicInteractionsObject}
 }
+\value{
+invisible(1)
+}
 \description{
 Representation function for GenomicInteractions
 }

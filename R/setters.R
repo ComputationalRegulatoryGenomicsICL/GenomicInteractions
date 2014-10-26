@@ -6,7 +6,7 @@
 #' @name setters
 #' @param GIObject A GenomicInteractions object
 #' @param value A vector to replace a slot in the object
-#' @return NULL
+#' @return GenomicInteractions object
 #' 
 #'  @examples
 #' library(BSgenome.Mmusculus.UCSC.mm9)

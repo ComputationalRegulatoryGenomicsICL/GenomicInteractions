@@ -13,7 +13,7 @@
 #' @keywords datasets
 #' @usage data(hic_example_data)
 #' @format A GenomicInteractions object with length 8171.
-#' 
+#' @return GenomicInteractions object
 #' @references Seitan, V. C. et al. Cohesin-based chromatin interactions enable 
 #' regulated gene expression within pre-existing architectural compartments. 
 #' Genome Res. 23, 2066-77 (2013).
@@ -36,6 +36,7 @@ NULL
 #' @keywords datasets
 #' @usage data(mm9_refseq_promoters)
 #' @format A GRanges object with length 2441.
+#' @format a GRanges object
 NULL
 
 #' Human Refseq transcripts from chr 17-18
@@ -50,4 +51,5 @@ NULL
 #' @keywords datasets
 #' @usage data(hg19.refseq.transcripts)
 #' @format A GRanges object with length 2441.
+#' @format a GRanges object
 NULL

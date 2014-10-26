@@ -11,59 +11,59 @@
 #' @param feature.class If `features' is a character vector, the corresponding feature name, e.g. "promoter".
 #' @return a subsetted GenomicInteractions object
 #' @export
-setGeneric("subsetByFeatures",function(GIObject, features, feature.class){standardGeneric ("subsetByFeatures")})
+setGeneric("subsetByFeatures",function(GIObject, features, feature.class=NULL){standardGeneric ("subsetByFeatures")})
 
 #' @rdname GenomicInteractions-subsetByFeatures-methods
 #' @import GenomicRanges
 #' @export
 setMethod("subsetByFeatures", c("GenomicInteractions", "GRanges", "missing"), function(GIObject, features, feature.class=NULL){
-  indic = unique(c(subjectHits(findOverlaps(features, GIObject@anchor_one)), subjectHits(findOverlaps(features, GIObject@anchor_two))))
-  return( new("GenomicInteractions", 
-              experiment_name = GIObject@experiment_name, 
-              description = GIObject@description, 
-              genome_name = GIObject@genome_name, 
-              anchor_one=GIObject@anchor_one[indic], 
-              anchor_two=GIObject@anchor_one[indic], 
-              counts=GIObject@counts[indic], 
-              pvalue=GIObject@pvalue[indic], 
-              fdr=GIObject@fdr[indic]) )
+    indic = unique(c(subjectHits(findOverlaps(features, GIObject@anchor_one)), subjectHits(findOverlaps(features, GIObject@anchor_two))))
+    return( new("GenomicInteractions", 
+        experiment_name = GIObject@experiment_name, 
+        description = GIObject@description, 
+        genome_name = GIObject@genome_name, 
+        anchor_one=GIObject@anchor_one[indic], 
+        anchor_two=GIObject@anchor_two[indic], 
+        counts=GIObject@counts[indic], 
+        pvalue=GIObject@pvalue[indic], 
+        fdr=GIObject@fdr[indic]) )
 })
 
 #' @rdname GenomicInteractions-subsetByFeatures-methods
 #' @import GenomicRanges
 #' @export
 setMethod("subsetByFeatures", c("GenomicInteractions", "GRangesList", "missing"), function(GIObject, features, feature.class=NULL){
-  indic = unique(c(subjectHits(findOverlaps(features, GIObject@anchor_one)), subjectHits(findOverlaps(features, GIObject@anchor_two))))
-  return( new("GenomicInteractions", 
-              experiment_name = GIObject@experiment_name, 
-              description = GIObject@description, 
-              genome_name = GIObject@genome_name, 
-              anchor_one=GIObject@anchor_one[indic], 
-              anchor_two=GIObject@anchor_one[indic], 
-              counts=GIObject@counts[indic], 
-              pvalue=GIObject@pvalue[indic], 
-              fdr=GIObject@fdr[indic]) )
+    indic = unique(c(subjectHits(findOverlaps(features, GIObject@anchor_one)), subjectHits(findOverlaps(features, GIObject@anchor_two))))
+    return( new("GenomicInteractions", 
+        experiment_name = GIObject@experiment_name, 
+        description = GIObject@description, 
+        genome_name = GIObject@genome_name, 
+        anchor_one=GIObject@anchor_one[indic], 
+        anchor_two=GIObject@anchor_two[indic], 
+        counts=GIObject@counts[indic], 
+        pvalue=GIObject@pvalue[indic], 
+        fdr=GIObject@fdr[indic]) )
 })
 
 #' @rdname GenomicInteractions-subsetByFeatures-methods
 #' @import GenomicRanges
 #' @export
 setMethod("subsetByFeatures", c("GenomicInteractions", "character", "character"), function(GIObject, features, feature.class){
-  if(feature.class %in% unique(c(GIObject@anchor_one$node.class, GIObject@anchor_two$node.class))){
-    indic = sapply(elementMetadata(GIObject@anchor_one)[[paste(feature.class, "id", sep=".")]], 
-                   function(x){ features %in% x }) | sapply(elementMetadata(GIObject@anchor_two)[[paste(feature.class, "id", sep=".")]], function(x){ features %in% x })
-    return( new("GenomicInteractions", 
-                experiment_name = GIObject@experiment_name, 
-                description = GIObject@description, 
-                genome_name = GIObject@genome_name, 
-                anchor_one=GIObject@anchor_one[indic], 
-                anchor_two=GIObject@anchor_one[indic], 
-                counts=GIObject@counts[indic], 
-                pvalue=GIObject@pvalue[indic], 
-                fdr=GIObject@fdr[indic]) )
-  }else{
-    stop(paste(feature.class," has not been annotated on this GenomicInteractions object"))
-  }                                                                         
+    if("node.class" %in% names(elementMetadata(GIObject@anchor_one)) & feature.class %in% unique(c(GIObject@anchor_one$node.class, GIObject@anchor_two$node.class))){
+        indic = sapply(elementMetadata(GIObject@anchor_one)[[paste(feature.class, "id", sep=".")]], 
+                    function(x){ features %in% x }) | sapply(elementMetadata(GIObject@anchor_two)[[paste(feature.class, "id", sep=".")]], function(x){ features %in% x })
+        return( new("GenomicInteractions", 
+            experiment_name = GIObject@experiment_name, 
+            description = GIObject@description, 
+            genome_name = GIObject@genome_name, 
+            anchor_one=GIObject@anchor_one[indic], 
+            anchor_two=GIObject@anchor_two[indic], 
+            counts=GIObject@counts[indic], 
+            pvalue=GIObject@pvalue[indic], 
+            fdr=GIObject@fdr[indic]) )
+    }else{
+        stop(paste(feature.class," has not been annotated on this GenomicInteractions object"))
+    }                                                                         
   
 })
 

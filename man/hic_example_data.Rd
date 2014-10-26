@@ -7,6 +7,9 @@
 \usage{
 data(hic_example_data)
 }
+\value{
+GenomicInteractions object
+}
 \description{
 This dataset contains HiC data from Seitan et al. 2013. The data was
 analysed using HOMER (Heinz et al. 2010) at a resolution of 100kb to

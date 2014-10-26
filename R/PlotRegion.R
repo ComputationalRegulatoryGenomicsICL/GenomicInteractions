@@ -182,16 +182,21 @@ setMethod("plotRegion",
     if(order.cis){ cis.right.reduced = cis.right.reduced[ order(end(cis.right.reduced), decreasing=TRUE) ] }
     trans.reduced = reduce(c(anchorOne(tmp.interactions)[one.status=="trans"], anchorTwo(tmp.interactions)[two.status=="trans"]))
   
-    reduced.anchors = restrict(c(anchorOne(GIObject)[ interaction.indexes ], anchorTwo(GIObject)[interaction.indexes]), start(region), end(region))
-    reduced.anchors = restrict(reduce(reduced.anchors[  unique(queryHits(findOverlaps(reduced.anchors, region)))]), start(region), end(region))
-  
+    all.anchors = restrict(c(anchorOne(GIObject)[ interaction.indexes ], anchorTwo(GIObject)[interaction.indexes]), start(region), end(region))
+    if(reduce.anchors){
+        all.anchors = restrict(reduce(all.anchors[  unique(queryHits(findOverlaps(all.anchors, region)))]), start(region), end(region))
+    }else{ 
+        all.anchors = restrict(all.anchors[  unique(queryHits(findOverlaps(all.anchors, region)))], start(region), end(region))
+    }
+    
     left.y.ends = seq( feature.locations["interactions"] + feature.sizes["interactions"], plot.height-feature.sizes["header"]-1, length.out=length(cis.left.reduced)) 
     right.y.ends = seq( feature.locations["interactions"] + feature.sizes["interactions"], plot.height-feature.sizes["header"]-1, length.out=length(cis.right.reduced)) 
   
     # plot trans-interactions 
-    if(plot.trans==TRUE){
-        for(i in 1:length(reduced.anchors)){
-            a.ol = findOverlaps(reduced.anchors[i], tmp.interactions) 
+    if(plot.trans){
+        trans.interaction.indexes = which( one.status == "trans" | two.status == "trans")
+        for(i in trans.interaction.indexes){
+            a.ol = findOverlaps(all.anchors[i], tmp.interactions) 
             a.1.ol = a.ol[["one"]]
             a.2.ol = a.ol[["two"]]
             if( sum(two.status[ unique(subjectHits(a.1.ol)) ] == "trans")>0 ){
@@ -206,7 +211,7 @@ setMethod("plotRegion",
             }
             sum.counts = a.1.counts + a.2.counts
             if(sum.counts > 0){
-                p0x = .calcCoords(.calcMdpt(start(reduced.anchors[ i ]), end(reduced.anchors[ i ])), plot.width, block.start, block.width)
+                p0x = .calcCoords(.calcMdpt(start(all.anchors[ i ]), end(all.anchors[ i ])), plot.width, block.start, block.width)
                 if(p0x < (plot.width/2)){
                     p2x = 0
                     p1x = p0x * (2/3)   
@@ -223,38 +228,46 @@ setMethod("plotRegion",
         }
     }    
     
-    for(i in 1:length(interaction.indexes)){
-        if( (one.status[i] == "inside" & two.status[i] == "cis-left") | (one.status[i] == "cis-left" & two.status[i] == "inside") & plot.cis ){
-            p2x = 0
-            if(one.status[i] == "inside"){
-                p0x = .calcCoords(.calcMdpt(start(anchorOne(tmp.interactions)[ i ]), end(anchorOne(tmp.interactions)[ i ])), plot.width, block.start, block.width)
-                p2y = left.y.ends[  subjectHits(findOverlaps( anchorTwo(tmp.interactions)[i], cis.left.reduced )) ] 
-            }else if(two.status[i] == "inside"){
-                p0x = .calcCoords(.calcMdpt(start(anchorTwo(tmp.interactions)[ i ]), end(anchorTwo(tmp.interactions)[ i ])), plot.width, block.start, block.width)											   
-                p2y = left.y.ends[  subjectHits(findOverlaps( anchorOne(tmp.interactions)[i], cis.left.reduced )) ]
+    if(plot.cis){
+        cis.interaction.indexes = which(one.status == "cis-left" | two.status == "cis-left" | one.status == "cis-right" | two.status == "cis-right")
+        for(i in cis.interaction.indexes){
+            if(((one.status[i] == "inside" & two.status[i] == "cis-left") | (one.status[i] == "cis-left" & two.status[i] == "inside"))){
+                p2x = 0
+                if(one.status[i] == "inside"){
+                    p0x = .calcCoords(.calcMdpt(start(anchorOne(tmp.interactions)[ i ]), end(anchorOne(tmp.interactions)[ i ])), plot.width, block.start, block.width)
+                    p2y = left.y.ends[  subjectHits(findOverlaps( anchorTwo(tmp.interactions)[i], cis.left.reduced )) ] 
+                }else if(two.status[i] == "inside"){
+                    p0x = .calcCoords(.calcMdpt(start(anchorTwo(tmp.interactions)[ i ]), end(anchorTwo(tmp.interactions)[ i ])), plot.width, block.start, block.width)											   
+                    p2y = left.y.ends[  subjectHits(findOverlaps( anchorOne(tmp.interactions)[i], cis.left.reduced )) ]
+                }
+                p1x = p0x * (2/3)
+                x.lines = .bezier.curve(p0x, p1x, p2x, 1000) 
+                y.lines = .bezier.curve(feature.locations["interactions"] + (feature.sizes["anchor"]/2) + spacer, 
+                                        plot.height - ifelse(plot.header, feature.sizes["header"], 0) - 1.5, 
+                                        p2y, 1000)	 													
+                lines(x.lines, y.lines, type="l", col="darkslategray", lwd=log(count(tmp.interactions)[i]))
+            }else if(((one.status[i] == "inside" & two.status[i] == "cis-right") | (one.status[i] == "cis-right" & two.status[i] == "inside"))){
+                p2x = 1000
+                if(one.status[i] == "inside"){
+                    p0x = .calcCoords(.calcMdpt(start(anchorOne(tmp.interactions)[ i ]), end(anchorOne(tmp.interactions)[ i ])), plot.width, block.start, block.width)
+                    p2y = right.y.ends[  subjectHits(findOverlaps( anchorTwo(tmp.interactions)[i], cis.right.reduced )) ] 
+                }else if(two.status[i] == "inside"){
+                    p0x = .calcCoords(.calcMdpt(start(anchorTwo(tmp.interactions)[ i ]), end(anchorTwo(tmp.interactions)[ i ])), plot.width, block.start, block.width)
+                    p2y = right.y.ends[  subjectHits(findOverlaps( anchorOne(tmp.interactions)[i], cis.right.reduced )) ] 
+                }
+                p1x = (( plot.width - p0x ) / 3) + p0x
+                x.lines = .bezier.curve(p0x, p1x, p2x, 1000) 
+                y.lines = .bezier.curve(feature.locations["interactions"] + (feature.sizes["anchor"]/2) + spacer, 
+                                        plot.height - ifelse(plot.header, feature.sizes["header"], 0) - 1.5, 
+                                        p2y, 1000) 
+                lines(x.lines, y.lines, type="l", col="darkslategray", lwd=log(count(tmp.interactions)[i]))
             }
-            p1x = p0x * (2/3)
-            x.lines = .bezier.curve(p0x, p1x, p2x, 1000) 
-            y.lines = .bezier.curve(feature.locations["interactions"] + (feature.sizes["anchor"]/2) + spacer, 
-                                    plot.height - ifelse(plot.header, feature.sizes["header"], 0) - 1.5, 
-                                    p2y, 1000)	 													
-            lines(x.lines, y.lines, type="l", col="darkslategray", lwd=log(count(tmp.interactions)[i]))
-        }else if((one.status[i] == "inside" & two.status[i] == "cis-right") | (one.status[i] == "cis-right" & two.status[i] == "inside") & plot.cis ){
-            p2x = 1000
-            if(one.status[i] == "inside"){
-                p0x = .calcCoords(.calcMdpt(start(anchorOne(tmp.interactions)[ i ]), end(anchorOne(tmp.interactions)[ i ])), plot.width, block.start, block.width)
-                p2y = right.y.ends[  subjectHits(findOverlaps( anchorTwo(tmp.interactions)[i], cis.right.reduced )) ] 
-            }else if(two.status[i] == "inside"){
-                p0x = .calcCoords(.calcMdpt(start(anchorTwo(tmp.interactions)[ i ]), end(anchorTwo(tmp.interactions)[ i ])), plot.width, block.start, block.width)
-                p2y = right.y.ends[  subjectHits(findOverlaps( anchorOne(tmp.interactions)[i], cis.right.reduced )) ] 
-            }
-            p1x = (( plot.width - p0x ) / 3) + p0x
-            x.lines = .bezier.curve(p0x, p1x, p2x, 1000) 
-            y.lines = .bezier.curve(feature.locations["interactions"] + (feature.sizes["anchor"]/2) + spacer, 
-                                    plot.height - ifelse(plot.header, feature.sizes["header"], 0) - 1.5, 
-                                    p2y, 1000) 
-            lines(x.lines, y.lines, type="l", col="darkslategray", lwd=log(count(tmp.interactions)[i]))
-        }else if(one.status[i] == "inside" & two.status[i] == "inside"){
+        }
+    }
+    
+    internal.interaction.indexes = which( one.status == "inside" & two.status == "inside")
+    for(i in internal.interaction.indexes){
+        if(one.status[i] == "inside" & two.status[i] == "inside"){
             p0x = .calcCoords(.calcMdpt(start(anchorOne(tmp.interactions)[ i ]), end(anchorOne(tmp.interactions)[ i ])), plot.width, block.start, block.width)
             p2x = .calcCoords(.calcMdpt(start(anchorTwo(tmp.interactions)[ i ]), end(anchorTwo(tmp.interactions)[ i ])), plot.width, block.start, block.width)
             p1x = .calcMdpt(p0x, p2x)
@@ -265,21 +278,21 @@ setMethod("plotRegion",
             lines(x.lines, y.lines, type="l", col="black", lwd=log(count(tmp.interactions)[i]))
         }
     }
-    if(reduce.anchors==TRUE){
-        xcoord.start = .calcCoords(start(reduced.anchors), plot.width, block.start, block.width)
-        xcoord.end = .calcCoords(end(reduced.anchors), plot.width, block.start, block.width)
-        rect(xcoord.start, feature.locations["interactions"] + spacer, xcoord.end, feature.locations["interactions"] + feature.sizes["anchor"] + spacer, col=anchor.col)
-        if(plot.lines){ablineclip(v=unique(xcoord.start), y1=0, y2=plot.height-ifelse(plot.header, feature.sizes["header"], 0), lty=2,lwd=0.5)}
-        if(plot.lines){ablineclip(v=unique(xcoord.end), y1=0, y2=plot.height-ifelse(plot.header, feature.sizes["header"], 0), lty=2, lwd=0.5)}
-    }else{
-        xcoord.start = c(.calcCoords(start(anchorOne(tmp.interactions)[one.status == "inside"]), plot.width, block.start, block.width), 
-                         .calcCoords(start(anchorTwo(tmp.interactions)[two.status == "inside"]), plot.width, block.start, block.width))
-        xcoord.end = c(.calcCoords(end(anchorOne(tmp.interactions)[one.status == "inside"]), plot.width, block.start, block.width), 
-                       .calcCoords(end(anchorTwo(tmp.interactions)[two.status == "inside"]), plot.width, block.start, block.width))
-        rect(xcoord.start, feature.locations["interactions"] + spacer, xcoord.end, feature.locations["interactions"]+ feature.sizes["anchor"] + spacer, col=anchor.col)
-        if(plot.lines){ablineclip(v=unique(xcoord.start), y1=0, y2=plot.height-ifelse(plot.header, feature.sizes["header"], 0), lty=2,lwd=0.5)}
-        if(plot.lines){ablineclip(v=unique(xcoord.end), y1=0, y2=plot.height-ifelse(plot.header, feature.sizes["header"], 0), lty=2, lwd=0.5)}
-    }
+    #if(reduce.anchors==TRUE){
+    xcoord.start = .calcCoords(start(all.anchors), plot.width, block.start, block.width)
+    xcoord.end = .calcCoords(end(all.anchors), plot.width, block.start, block.width)
+    rect(xcoord.start, feature.locations["interactions"] + spacer, xcoord.end, feature.locations["interactions"] + feature.sizes["anchor"] + spacer, col=anchor.col)
+    if(plot.lines){ablineclip(v=unique(xcoord.start), y1=0, y2=plot.height-ifelse(plot.header, feature.sizes["header"], 0), lty=2,lwd=0.5)}
+    if(plot.lines){ablineclip(v=unique(xcoord.end), y1=0, y2=plot.height-ifelse(plot.header, feature.sizes["header"], 0), lty=2, lwd=0.5)}
+    #}else{
+    #    xcoord.start = c(.calcCoords(start(anchorOne(tmp.interactions)[one.status == "inside"]), plot.width, block.start, block.width), 
+    #                     .calcCoords(start(anchorTwo(tmp.interactions)[two.status == "inside"]), plot.width, block.start, block.width))
+    #    xcoord.end = c(.calcCoords(end(anchorOne(tmp.interactions)[one.status == "inside"]), plot.width, block.start, block.width), 
+    #                   .calcCoords(end(anchorTwo(tmp.interactions)[two.status == "inside"]), plot.width, block.start, block.width))
+    #    rect(xcoord.start, feature.locations["interactions"] + spacer, xcoord.end, feature.locations["interactions"]+ feature.sizes["anchor"] + spacer, col=anchor.col)
+    #    if(plot.lines){ablineclip(v=unique(xcoord.start), y1=0, y2=plot.height-ifelse(plot.header, feature.sizes["header"], 0), lty=2,lwd=0.5)}
+    #    if(plot.lines){ablineclip(v=unique(xcoord.end), y1=0, y2=plot.height-ifelse(plot.header, feature.sizes["header"], 0), lty=2, lwd=0.5)}
+    #}
   
     if(plot.cis & plot.cis.names){
         if(length(cis.left.reduced) > 0){

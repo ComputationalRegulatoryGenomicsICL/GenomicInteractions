@@ -7,7 +7,7 @@
 \alias{subsetByFeatures,GenomicInteractions,character,character-method}
 \title{Subset a GenomicInteractions object by features}
 \usage{
-subsetByFeatures(GIObject, features, feature.class)
+subsetByFeatures(GIObject, features, feature.class = NULL)
 
 \S4method{subsetByFeatures}{GenomicInteractions,GRanges,missing}(GIObject,
   features, feature.class = NULL)
@@ -16,7 +16,7 @@ subsetByFeatures(GIObject, features, feature.class)
   features, feature.class = NULL)
 
 \S4method{subsetByFeatures}{GenomicInteractions,character,character}(GIObject,
-  features, feature.class)
+  features, feature.class = NULL)
 }
 \arguments{
 \item{GIObject}{A GenomicInteractions object}

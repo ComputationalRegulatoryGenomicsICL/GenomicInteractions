@@ -1,9 +1,9 @@
 ---
 title: "HiC vignette for GenomicInteractions package"
 output:
-  pdf_document: default
   html_document:
     keep_md: yes
+  pdf_document: default
 ---
 
 <!--
@@ -19,7 +19,9 @@ options("scipen"=10, "digits"=5)
 
 This vignette shows you how GenomicInteractions can be used to investigate significant interactions in HiC data that has been analysed using [HOMER](http://homer.salk.edu/homer/) software [1]. GenomicInteractions can take a HOMER [interaction file](http://homer.salk.edu/homer/interactions/HiCinteractions.html) as input. 
 
-The data we are using comes from [this paper](http://genome.cshlp.org/content/23/12/2066.full) [2] and can be downloaded from [GEO](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE48763). It is HiC data from wild type mouse double positive thymocytes. The experiment was carried out using the HindIII restriction enzyme, and the data was processed as described in the paper. HOMER software has been used to detect significant interactions at a resolution of 100kb. For the purposes of this vignette, we will consider only data from chromosomes 14 and 15.
+HiC data comes from [chromosome conformation capture](http://en.wikipedia.org/wiki/Chromosome_conformation_capture) followed by high-throughput sequencing. Unlike 3C, 4C or 5C, which target specific regions, it can provide genome-wide information about the spatial proximity of regions of the genome. The raw data takes the form of paired-end reads connecting restriction fragments. The resolution of a HiC experiment is limited by the number of paired-end sequencing reads produced and by the sizes of restriction fragments. To increase the power to distinguish real interactions from random noise, HiC data is commonly analysed in bins from 20kb - 1Mb. There are a variety of tools available for binning the data, controlling for noise (e.g. self-ligations of restriction fragments), and finding significant interactions. 
+
+The data we are using comes from [this paper](http://genome.cshlp.org/content/23/12/2066.full) [2] and can be downloaded from [GEO](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE48763). It is HiC data from wild type mouse double positive thymocytes. The experiment was carried out using the HindIII restriction enzyme. The paired-end reads were aligned to the mm9 mouse genome assembly and HOMER software was used to filter reads and detect significant interactions at a resolution of 100kb. For the purposes of this vignette, we will consider only data from chromosomes 14 and 15.
 
 ## Making a GenomicInteractions object
 
@@ -41,7 +43,7 @@ hic_data <- GenomicInteractions(hic_file,
                     gname="BSgenome.Mmusculus.UCSC.mm9")
 ```
 
-The `GenomicInteractions` object consists of two linked `GenomicRanges` objects containing the anchors of each interaction, as well as the number of reads supporting each interaction. In addition, p-value and FDRs from the input file are stored. Note that importing data of type 'homer' will always give a warning `Name partially matched in data frame`. This is because the name of the column containing the calculated FDR will contain the total number of interactions, which will be different for each experiment, so we cannot match the column name exactly.
+The `GenomicInteractions` object consists of two linked `GenomicRanges` objects containing the anchors of each interaction, as well as the number of reads supporting each interaction. In addition, p-values and FDRs from the input file are stored. Note that importing data of type 'homer' will always give a warning `Name partially matched in data frame`. This is because the name of the column containing the calculated FDR will contain the total number of interactions, which will be different for each experiment, so we cannot match the column name exactly.
 
 We can check that the anchors are of the expected size (100kb).
 
@@ -51,28 +53,28 @@ summary(width(anchorTwo(hic_data)))
 hic_data
 ```
 
-Some anchors are shorter than 100kb due to being at the end of a chromosome. There are `r length(hic_data)` interactions in total, with a total of `r sum(count(hic_data))` reads supporting them. To calculate the average number of reads per interaction, first use `count()` to get the count of reads supporting each individual interaction. 
+Some anchors are shorter than 100kb due to the bin being at the end of a chromosome. There are `r length(hic_data)` interactions in total, with a total of `r sum(count(hic_data))` reads supporting them. To calculate the average number of reads per interaction, first use `count()` to get the count of reads supporting each individual interaction. 
 
 ```{r}
 head(count(hic_data))
 mean(count(hic_data))
 ```
-However, since we have FDR and p-values, it is probably more informative to look at these. 
+
+However, since we have FDRs and p-values, it is probably more informative to use these to find interactions of interest.
+
 ```{r}
 plot(density(pValue(hic_data)))
 plot(density(FDR(hic_data)))
 ```
 
-We can subset the data based on FDR.
+## Summary statistics
+
+The package provides some functions to plot summary statistics of your data that may be of interest, such as the percentage of interactions that are between regions on the same chromosome (_cis_-interactions) or on different chromosomes (_trans_-interactions), or the number of reads supporting each interaction. These plots can be used to assess the level of noise in your dataset - the presence of many interactions with high FDRs or low read counts suggests that the data may be noisy and contain a lot of false positive interactions. You can subset the GenomicInteractions object by FDR or by number of reads.
 
 ```{r}
 sum(FDR(hic_data) < 0.1)
 hic_data_subset <- hic_data[FDR(hic_data) < 0.1]
 ```
-
-## Summary statistics
-
-The package provides some functions to plot summary statistics of your data that may be of interest, such as the percentage of interactions that are in _cis_ or in _trans_, or the number of reads supporting each interaction.
 
 ```{r}
 plotCisTrans(hic_data)
@@ -82,13 +84,13 @@ plotCounts(hic_data, cut=30)
 plotCounts(hic_data_subset, cut=30)
 ```
 
-Subsetting by FDR will tend to remove interactions that have less read support. _Trans_ interactions tend to have lower read support than _cis_ interactions, so the percentage of _trans_ interactions decreases. 
+Subsetting by FDR will tend to remove interactions that are supported by fewer reads. _Trans_ interactions tend to have lower read support than _cis_ interactions, so the percentage of _trans_ interactions decreases. 
 
 ## Annotation 
 
-One of the most powerful features of GenomicInteractions is that it allows you to annotate interactions by whether the anchors overlap genomic features of interest, such as promoters or enhancers. However this process can be slow for large datasets, so here we annotate with just promoters.
+One of the most powerful features of GenomicInteractions is that it allows you to annotate interactions by whether the anchors overlap genomic features of interest, such as promoters or enhancers. However this process can be slow for large datasets, so here we annotate with just promoters. 
 
-Genome annotation data can be obtained from, for example UCSC databases using the GenomicFeatures package. We will use promoters of Refseq genes extended to a width of 5kb. Downloading all the data can be a slow process, so the data for promoters for chromosomes 14 and 15 is provided with this package.
+Genome annotation data can be obtained from, for example, UCSC databases using the GenomicFeatures package. We will use promoters of Refseq genes extended to a width of 5kb. Downloading all the data can be a slow process, so the data for promoters for chromosomes 14 and 15 is provided with this package.
 
 ```{r eval=FALSE}
 ## Not run
@@ -100,6 +102,7 @@ refseq.transcripts = refseq.transcripts[ names(refseq.transcripts) %in% unlist(r
 mm9_refseq_promoters <- promoters(refseq.transcripts, 2500,2500)
 mm9_refseq_promoters <- unlist(mm9_refseq_promoters[seqnames(mm9_refseq_promoters) %in% c("chr14", "chr15")])
 ```
+
 `annotateInteractions` takes a list of features in GRanges or GRangesList format and annotates the interaction anchors based on overlap with these features. The list of annotation features should have descriptive names, as these names are stored in the annotated GenomicInteractions object and used to assign anchor (node) classes.
 
 ```{r}
@@ -111,9 +114,7 @@ annotateInteractions(hic_data_subset, annotation.features)
 hic_data_subset
 ```
 
-
-In addition, GRangesLists within the list of features should be named, and GRanges objects should have an "id" metadata column. These names or ids for each feature are stored in the metadata for the anchors of the GenomicInteractions object. As each anchor may overlap multiple promoters, the "promoter.id" column is stored as a list. Promoter ids can be accessed from the metadata of the anchors.
-
+In addition, the features themselves should have names or IDs. For GRangesLists these names can be the `names()` of the items in the list. GRanges objects should have an "id" metadata column (note lowercase). These names or IDs for each feature are stored in the metadata for the anchors of the GenomicInteractions object. As each anchor may overlap multiple promoters, the "promoter.id" column is stored as a list. Promoter IDs can be accessed from the metadata of the anchors.
 
 ```{r}
 anchorOne(hic_data_subset)
@@ -139,7 +140,7 @@ Interaction types are determined by the classes of the interacting nodes. As we 
 plotInteractionAnnotations(hic_data_subset)
 ```
 
-To get all promoter--distal interactions:
+Distal regions interacting with a promoter may contain distal regulatory elements such as enhancers or insulators. To get all promoter--distal interactions:
 ```{r}
 length(hic_data_subset[isInteractionType(hic_data_subset, "promoter", "distal")])
 ```
@@ -174,7 +175,7 @@ summary(calculateDistances(hic_data_subset,method="midpoint"))
 
 ## Virtual 4C plots
 
-There are functions available to plot a "virtual 4C" plot of all interactions with a given anchor or position, e.g. a promoter, or around a set of positions e.g. all promoters. The argument `flip = TRUE` can be used to flip coverage according to the strand of the region of interest. For example, the interactions around a set of promoters are plotted below. When `flip = TRUE` a slight bias towards downstream interactions is visible. This may be because of promoters interacting with the transcription termination site of the same gene or with intronic enhancers. 
+There are functions available to plot a "virtual 4C" plot of all interactions involving a region of interest, e.g. a specific promoter, or around a set of positions, e.g. all CTCF binding sites. These can be used to visualise interactions between a promoter of interest and its regulatory elements, or to summarise the interactions of a particular node class. The argument `flip = TRUE` can be used to flip coverage according to the strand of the region of interest. For example, the interactions around a set of promoters are plotted below. When `flip = TRUE` a slight bias towards downstream interactions is visible. This may be because of promoters interacting with the transcription termination site of the same gene or with intronic enhancers. 
 
 ```{r}
 viewPoint(mm9_refseq_promoters[1], hic_data_subset, leftflank = 2000000, rightflank = 2000000)

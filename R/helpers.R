@@ -154,7 +154,7 @@ setMethod("findOverlaps", c("GRanges", "GenomicInteractions"), function(query, s
 #' Print function for GenomicInteractions
 #'
 #' @param x GenomicInteractionsObject
-#' @return NULL
+#' @return invisible(1)
 #' @docType methods
 #' @export
 setMethod("print", "GenomicInteractions", function(x){
@@ -179,12 +179,13 @@ setMethod("print", "GenomicInteractions", function(x){
                         sep="\t-----\t", collapse="\n\t\t"), sep="")
     cat(ifelse(length(x)>10, "\n\t\t....\n", ""))
     cat("\n")
+    return(invisible(1))
 })
 
 #' Representation function for GenomicInteractions
 #'
 #' @param object A GenomicInteractionsObject
-#' @return NULL
+#' @return invisible(1)
 #' @docType methods
 #' @export
 setMethod("show", "GenomicInteractions", function(object){ 
@@ -209,5 +210,6 @@ setMethod("show", "GenomicInteractions", function(object){
                              sep="\t-----\t", collapse="\n\t\t"), sep="")
     cat(ifelse(length(object)>10, "\n\t\t....\n", ""))
     cat("\n")
+    return(invisible(1))
 })
        

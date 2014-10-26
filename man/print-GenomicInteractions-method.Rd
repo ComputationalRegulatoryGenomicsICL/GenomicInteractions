@@ -9,6 +9,9 @@
 \arguments{
 \item{x}{GenomicInteractionsObject}
 }
+\value{
+invisible(1)
+}
 \description{
 Print function for GenomicInteractions
 }

@@ -5,8 +5,8 @@
 \alias{summariseByFeatures,GenomicInteractions-method}
 \title{Summary statistics of interactions for a given feature set}
 \usage{
-summariseByFeatures(GIObject, features, feature.name, distance.method,
-  annotate.self)
+summariseByFeatures(GIObject, features, feature.name,
+  distance.method = "midpoint", annotate.self = FALSE)
 
 \S4method{summariseByFeatures}{GenomicInteractions}(GIObject, features,
   feature.name, distance.method = "midpoint", annotate.self = FALSE)

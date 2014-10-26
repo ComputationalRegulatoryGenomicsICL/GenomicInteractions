@@ -39,6 +39,9 @@ normalisedCount(GIObject) <- value
 
 \item{value}{A vector to replace a slot in the object}
 }
+\value{
+GenomicInteractions object
+}
 \description{
 Use these functions to set data stored in each of the slots of a
 GenomicInteractions object.

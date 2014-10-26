@@ -19,13 +19,16 @@
 #' data(hic_example_data)
 #' plotSummaryStats(hic_example_data)
 plotSummaryStats <- function(GIObject, other=5, cut=10){
-
   p1 <- ggplotGrob(plotCisTrans(GIObject))
   p2 <- ggplotGrob(plotDists(GIObject))
-  p3 <- ggplotGrob(plotInteractionAnnotations(GIObject, other=other))
   p4 <- ggplotGrob(plotCounts(GIObject, cut=cut))
   
-  grid.arrange(p4,p2,p1,p3, ncol=2, nrow=2, main=GIObject@experiment_name)
+  if ("node.class" %in% names(elementMetadata(GIObject@anchor_one))) {
+    p3 <- ggplotGrob(plotInteractionAnnotations(GIObject, other=other))
+    grid.arrange(p4,p2,p1,p3, ncol=2, nrow=2, main=GIObject@experiment_name)
+  }else{
+    grid.arrange(p4,p2,p1, ncol=2, nrow=2, main=GIObject@experiment_name)
+  }
   return(invisible(1))
 }
 
