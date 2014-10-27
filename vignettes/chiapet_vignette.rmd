@@ -1,4 +1,4 @@
----
+e--
 title: "Package Vignette for Genomic Interactions: ChIA-PET data"
 output: 
   pdf_document: default
@@ -16,24 +16,42 @@ library(knitr)
 opts_chunk$set(fig.width=12, fig.height=8)
 ```
 
+## ChIA-PET
+
+Chromatin interaction analysis with paired-end tag sequencing (ChIA-PET) is a recent
+method to study protein-mediated interactions at a genome-wide scale. Like most techniques
+for studying chromatin interaction it is based on [chromosome conformation capture](http://en.wikipedia.org/wiki/Chromosome_conformation_capture)
+technology. Unlike 3C, 4C and 5C, however, it can detect interactions genome-wide, and 
+includes a [ChIP](http://en.wikipedia.org/wiki/Chromatin_immunoprecipitation) step to
+purify interactions involving a protein of interest.
+
+The raw data from ChIA-PET is in the form of paired-end reads attached to one of two
+linker sequences. Reads with chimeric linkers are removed, and the data is aligned to the
+reference genome. The [**ChIA-PET tool**](http://genomebiology.com/2010/11/2/R22) can then
+be used to find pairs of regions ("anchors") which have a significant number of reads mapping
+between them and therefore represent biologically meaningful chromatin 
+interactions in the sample.
+
 ## Imports
 
-First we need to load the GenomicInteractions package:
+First we need to load the GenomicInteractions package, and the mm9 reference genome:
 
 ```{r imports, warning=F, results="hide"}
 library(GenomicInteractions)
 library(BSgenome.Hsapiens.UCSC.hg19) 
 ```
 
+## Data
+
 We can then read in our data directly from the output of the 
 [**ChIA-PET tool**](http://genomebiology.com/2010/11/2/R22). At
 this stage we can also provide information about the cell type and a
 description tag for the experiment. The data is taken from Li et al., 2012, 
 published in [**Cell**](http://www.sciencedirect.com/science/article/pii/S0092867411015170).
-
-<!--
-The data is subsetted from the original to only include anchors on chromosomes 
-17 and 18. -->
+They have used antibodies against the initiation form of Pol II, which you would expect to
+find at active promoters, and we are looking at data from the K562 myelogenous leukemia cell
+line. The data should therefore give us an insight into the processes which regulate genes
+that are being actively transcribed.
 
 ```{r load_data}
 chiapet.data = system.file("extdata/k562.rep1.cluster.pet3+.txt", 
@@ -68,16 +86,17 @@ head(FDR(k562.rep1))
 hist(-log10(pValue(k562.rep1)))
 ```
 
-The two linked `GRanges` object can be returned, but not altered:
+The two linked `GRanges` objects can be returned, but not altered in-place:
 
 ```{r anchor_access}
 anchorOne(k562.rep1)
 anchorTwo(k562.rep1)
 ```
 
-`GenomicInteractions` objects can easily handle *trans*-chromosomal interactions, 
-since the anchors can be from any point along the chromosome. `is.trans` returns
-a logical vector, likewise `is.cis` is the opposite of this function.
+`GenomicInteractions` objects can easily handle interactions detected between
+chromosomes, known as *trans*-chromosomal interactions, since the anchors can
+be at any point along the genome. `is.trans` returns a logical vector;
+likewise `is.cis` is the opposite of this function.
 
 ```{r trans}
 sprintf("Percentage of trans-chromosomal interactions %.2f", 
@@ -95,12 +114,22 @@ head(calculateDistances(k562.rep1, method="midpoint"))
 ```
 
 `GenomicRanges` objects can be subsetted by either integer or logical vectors like
-most R objects, and also BioConductor Rle objects. 
+most R objects, and also BioConductor `Rle` objects. 
 
 ```{r subsetting}
 k562.rep1[1:10] # first interactions in the dataset
 k562.rep1[sample(length(k562.rep1), 100)] # 100 interactions subsample
 k562.cis = k562.rep1[is.cis(k562.rep1)]
+```
+
+The length of each interaction is not stored as metadata, but we can calculate
+the distance of each interaction using either the inner edge, outer edge or
+midpoints of the anchors. Since this is undefinable for *trans*-chromosomal interactions
+it is best to first subset only *cis* interactions before calling `calculateDistances`,
+otherwise `NA`s will be present in the returned vector.
+
+```{r susbet_distance}
+head(calculateDistances(k562.cis, method="midpoint"))
 k562.short = k562.cis[calculateDistances(k562.cis) < 1e6] # subset shorter interactions
 hist(calculateDistances(k562.short)) 
 ```
@@ -115,6 +144,12 @@ k562.rep1 = k562.rep1[sub]
 
 ## Annotation
 
+Genomic Interaction data is often used to look at the interactions between different
+elements in the genome, which are believed to have different functional roles. Interactions
+between promoters and their transcription termination sites, for example, are thought to
+be a by-product of the transcription process, whereas long-range interactions with enhancers
+play a role in gene regulation.
+
 Since `GenomicInteractions` is based on `GenomicRanges`, it is very easy to
 interrogate `GenomicInteractions` objects using `GenomicRanges` data. In the
 example, we want to annotate interactions that overlap the promoters,
@@ -122,7 +157,7 @@ transcription termination sites or the body of any gene. Since this can
 be a time-consuming and data-heavy process, this example runs the analysis
 for only chromosomes 17 & 18.
 
-First we need the list of refseq transcripts:
+First we need the list of RefSeq transcripts:
 
 ```{r annotation_features, eval=F}
 library(GenomicFeatures)
@@ -145,10 +180,9 @@ refseq.transcripts = hg19.refseq.transcripts
 We can then use functions from `GenomicRanges` to call promoters and
 terminators for these transcripts. We have taken promoter regions to be within
 2.5kb of an annotated TSS and terminators to be within 1kb of the end of an
-annotated transcript. 
-
-Since genes can have multiple transcripts, they can also have multiple
-promoters/terminators, so these are `GRangesList` objects.
+annotated transcript. Since genes can have multiple transcripts, they can also
+have multiple promoters/terminators, so these are `GRangesList` objects, which makes
+handling these objects slightly more complicated.
 
 ```{r magic}
 refseq.promoters = promoters(refseq.transcripts, upstream=2500, downstream=2500)
@@ -163,7 +197,7 @@ strand(refseq.terminators.ul) = ifelse(strand(refseq.terminators.ul) == "+", "-"
 refseq.terminators = relist(refseq.terminators.ul, refseq.transcripts)
 ```
 
-We can use these to subset our `GenomicInteractions` object directly from
+These can be used to subset a `GenomicInteractions` object directly from
 `GRanges` using the `GenomicRanges` overlaps methods. `findOverlaps` called on
 a `GenomicInteractions` object will return a list containing `Hits` objects for
 both anchors.
@@ -176,12 +210,13 @@ subsetByFeatures(k562.rep1, refseq.promoters)
 
 However, one of the most powerful features in the `GenomicInteractions` package
 is the ability to annotate each anchor with a list of genomic regions and then
-summarise interactions according to these features. 
+summarise interactions according to these features. This annotation is
+implemented as metadata columns for the anchors in the `GenomicInteractions`
+object and so is fast, and facilitates more complex analyses.
 
 The order in which we annotate the anchors is important, since each anchor can
 only have one `node.class`. The first listed take precedence. Any regions not
-overlapping ranges in `annotation.features` will be labelled with `distal`.
-
+overlapping ranges in `annotation.features` will be labelled as `distal`.
 
 ```{r annotation}
 annotation.features = list(promoter=refseq.promoters, 
@@ -191,7 +226,8 @@ annotateInteractions(k562.rep1, annotation.features)
 annotationFeatures(k562.rep1)
 ```
 
-We can now find promoters using the annotated `node.class` for each anchor:
+We can now find interactions involving promoters using the annotated
+`node.class` for each anchor:
 
 ```{r node.class}
 p.one = anchorOne(k562.rep1)$node.class == "promoter"
@@ -213,15 +249,17 @@ Alternatively, we can subset the object based on interaction type:
 k562.rep1[isInteractionType(k562.rep1, "terminator", "gene.body")]
 ```
 
-Common `node.class` values have shorter functions:
+The 3 most common `node.class` values have short functions defined for convenience
+(see `?is.pp` for a complete list):
 
 ```{r short_types, eval=F}
-k562.rep1[is.pp(k562.rep1)]
-k562.rep1[is.dd(k562.rep1)]
-k562.rep1[is.tt(k562.rep1)]
+k562.rep1[is.pp(k562.rep1)] # promoter-promoter interactions
+k562.rep1[is.dd(k562.rep1)] # distal-distal interactions
+k562.rep1[is.pt(k562.rep1)] # promoter-terminator interactions
 ```
 
-Summary plots of interactions classes can easily be produced:
+Summary plots of interactions classes can easily be produced to get an overall feel
+for the data:
 
 ```{r interaction_classes}
 plotInteractionAnnotations(k562.rep1, other=5)
@@ -229,7 +267,7 @@ plotInteractionAnnotations(k562.rep1, other=5)
 
 `viewpoints` will only take those interactions with a certain `node.class`:
 
-```{r promoter_classes}
+```{r promoter_classes, warning=F}
 plotInteractionAnnotations(k562.rep1, other=5, viewpoints="promoter")
 ```
 
@@ -237,26 +275,31 @@ These are also combined in the function `plotSummaryStats`.
 
 ## Feature Summaries
 
-The summariseByFeatures function summarises all interactions at a defined set
-of annotated loci.  In this example we use promoters, however any dataset can
-be used, for example transcription-factor ChIP data or predicted cis-regulatory
-sites.
+The `summariseByFeatures` allows us to look in more detail at interactions
+involving a specific set of loci. In this example we use all RefSeq promoters,
+which we already have loaded in a `GRangesList` object. 
 
-The categories are generated from the annotated categories in the object.
+It is however possible to use any dataset which can be represented as a named
+`GRanges` object, for example transcription-factor ChIP data, predicted
+cis-regulatory sites or certain categories of genes.
 
-```{r summarise}
+The categories are generated automatically from the annotated `node.class`
+values in the object.
+
+```{r summarise, warning=F}
 k562.rep1.promoter.annotation = summariseByFeatures(k562.rep1, refseq.promoters, 
                                                     "promoter", distance.method="midpoint", 
                                                     annotate.self=TRUE)
 colnames(k562.rep1.promoter.annotation)
 ```
 
-This allows us to ask questions of the data, and provide a quick method to
-isolate genes of interest. In this case we produce lists of RefSeq IDs, which
-can easily be converted to EntrezIDs or gene symbols through existing
-BioConductor packages.
+This allows us to very quickly generate summaries of the data and provides a
+quick method to isolate genes of interest. In this case we produce lists of
+RefSeq IDs, which can easily be converted to EntrezIDs or gene symbols through
+existing BioConductor packages (in this case `org.Hs.eg.db` provides bimaps between
+common human genome annotations).
 
-Which promoters have the strongest Promoter-Promoter interactions?
+Which promoters have the strongest Promoter-Promoter interactions based on PET-counts?
 
 ```{r p.p.interactions}
 i = order(k562.rep1.promoter.annotation$numberOfPromoterPromoterInteractions, 
