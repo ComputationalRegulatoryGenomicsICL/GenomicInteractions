@@ -136,18 +136,22 @@ NULL
 #' @export
 setMethod("findOverlaps", c("GenomicInteractions", "GRanges"), function(query, subject,  maxgap = 0L, minoverlap = 1L,
                                                                         type = c("any", "start", "end", "within", "equal"),
-                                                                        select = c("all", "first", "last", "arbitrary")){
-    return(list(one=findOverlaps(anchorOne(query), subject, maxgap=maxgap, minoverlap=minoverlap, type=type, select=select), 
-                two=findOverlaps(anchorTwo(query), subject, maxgap=maxgap, minoverlap=minoverlap, type=type, select=select)))  
+                                                                        select = c("all", "first", "last", "arbitrary"),
+                                                                        algorithm = c("intervaltree", "nclist")){
+    algorithm <- match.arg(algorithm)
+    return(list(one=findOverlaps(anchorOne(query), subject, maxgap=maxgap, minoverlap=minoverlap, type=type, select=select, algorithm=algorithm), 
+                two=findOverlaps(anchorTwo(query), subject, maxgap=maxgap, minoverlap=minoverlap, type=type, select=select, algorithm=algorithm)))  
 })
 
 #' @rdname GenomicInteractions-overlaps-methods
 #' @export
 setMethod("findOverlaps", c("GRanges", "GenomicInteractions"), function(query, subject, maxgap = 0L, minoverlap = 1L,
                                                                         type = c("any", "start", "end", "within", "equal"),
-                                                                        select = c("all", "first", "last", "arbitrary")){
-  return(list(one=findOverlaps(query, anchorOne(subject), maxgap=maxgap, minoverlap=minoverlap, type=type, select=select), 
-              two=findOverlaps(query, anchorTwo(subject), maxgap=maxgap, minoverlap=minoverlap, type=type, select=select)
+                                                                        select = c("all", "first", "last", "arbitrary"),
+                                                                        algorithm = c("intervaltree", "nclist")){
+  algorithm <- match.arg(algorithm)
+  return(list(one=findOverlaps(query, anchorOne(subject), maxgap=maxgap, minoverlap=minoverlap, type=type, select=select, algorithm=algorithm), 
+              two=findOverlaps(query, anchorTwo(subject), maxgap=maxgap, minoverlap=minoverlap, type=type, select=select, algorithm=algorithm)
               ))  
 })
 
