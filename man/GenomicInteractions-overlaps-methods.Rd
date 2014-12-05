@@ -8,18 +8,20 @@
 \usage{
 \S4method{findOverlaps}{GenomicInteractions,GRanges}(query, subject,
   maxgap = 0L, minoverlap = 1L, type = c("any", "start", "end", "within",
-  "equal"), select = c("all", "first", "last", "arbitrary"))
+  "equal"), select = c("all", "first", "last", "arbitrary"),
+  algorithm = c("nclist", "intervaltree"))
 
 \S4method{findOverlaps}{GRanges,GenomicInteractions}(query, subject,
   maxgap = 0L, minoverlap = 1L, type = c("any", "start", "end", "within",
-  "equal"), select = c("all", "first", "last", "arbitrary"))
+  "equal"), select = c("all", "first", "last", "arbitrary"),
+  algorithm = c("nclist", "intervaltree"))
 }
 \arguments{
 \item{query}{GenomicInteractions or GRanges}
 
 \item{subject}{GRanges or GenomicInteractions}
 
-\item{maxgap,minoverlap,type,select}{See 'findOverlaps' in the IRanges package.}
+\item{maxgap,minoverlap,type,select,algorithm}{See 'findOverlaps' in the IRanges package.}
 }
 \value{
 A list containing Hits objects for anchors one and two.

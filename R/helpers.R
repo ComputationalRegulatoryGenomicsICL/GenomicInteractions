@@ -137,7 +137,7 @@ NULL
 setMethod("findOverlaps", c("GenomicInteractions", "GRanges"), function(query, subject,  maxgap = 0L, minoverlap = 1L,
                                                                         type = c("any", "start", "end", "within", "equal"),
                                                                         select = c("all", "first", "last", "arbitrary"),
-                                                                        algorithm = c("intervaltree", "nclist")){
+                                                                        algorithm = c("nclist", "intervaltree")){
     algorithm <- match.arg(algorithm)
     return(list(one=findOverlaps(anchorOne(query), subject, maxgap=maxgap, minoverlap=minoverlap, type=type, select=select, algorithm=algorithm), 
                 two=findOverlaps(anchorTwo(query), subject, maxgap=maxgap, minoverlap=minoverlap, type=type, select=select, algorithm=algorithm)))  
@@ -148,7 +148,7 @@ setMethod("findOverlaps", c("GenomicInteractions", "GRanges"), function(query, s
 setMethod("findOverlaps", c("GRanges", "GenomicInteractions"), function(query, subject, maxgap = 0L, minoverlap = 1L,
                                                                         type = c("any", "start", "end", "within", "equal"),
                                                                         select = c("all", "first", "last", "arbitrary"),
-                                                                        algorithm = c("intervaltree", "nclist")){
+                                                                        algorithm = c("nclist", "intervaltree")){
   algorithm <- match.arg(algorithm)
   return(list(one=findOverlaps(query, anchorOne(subject), maxgap=maxgap, minoverlap=minoverlap, type=type, select=select, algorithm=algorithm), 
               two=findOverlaps(query, anchorTwo(subject), maxgap=maxgap, minoverlap=minoverlap, type=type, select=select, algorithm=algorithm)
