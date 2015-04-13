@@ -1,0 +1,29 @@
+CHANGES IN VERSION x.y.z
+-------------------------
+
+NEW FEATURES
+
+* Import method for reading data from two bam files containing paired end reads.
+* A function for removing duplicate interactions: 'removeDups'
+* Two methods for finding probable distance cutoffs for self ligations: 
+  'get_binom_ligation_threshold' and 'get_self_ligation_threshold'. 
+* 'countsBetweenAnchors': a function to summarise interactions between a set of 
+  genomic regions of interest.
+
+SIGNIFICANT USER-LEVEL CHANGES
+
+* GenomicInteractions objects have been refactored for consistency with GRanges
+  objects. Interaction-level metadata such as p-values is now stored as a DataFrame
+  accessible using 'mcols'.
+* importing data from a file is now done using 'makeGenomicInteractionsFromFile' 
+* 'GenomicInteractions' can be used to construct a new object from anchors
+  as GRanges objects and metadata.
+* 'show' method looks nicer and is faster.
+
+DEPRECATED AND DEFUNCT
+
+* 'FDR', 'pValue', 'normalisedCounts', 'genomeName': no longer needed 
+  because of refactoring. Access metadata by 'mcols' instead. 
+* 'count' renamed to 'interactionCounts'
+
+BUG FIXES

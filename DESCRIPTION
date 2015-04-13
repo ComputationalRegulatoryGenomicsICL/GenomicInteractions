@@ -1,28 +1,32 @@
 Package: GenomicInteractions
 Type: Package
 Title: R package for handling genomic interaction data
-Version: 1.1.1
+URL: https://github.com/ComputationalRegulatoryGenomicsICL/GenomicInteractions/
+Version: 1.0.4
 Date: 2014-07-14
-Author: Harmston, N., Ing-Simmons, E., Perry, M., Baresic A., Lenhard
+Author: Harmston, N., Ing-Simmons, E., Perry, M., Baresic, A., Lenhard,
     B.
 Maintainer: Nathan Harmston <nathan.harmston07@csc.mrc.ac.uk>
 Imports:
     Rsamtools,
     GenomicRanges,
     IRanges,
+    BiocGenerics,
     data.table,
     stringr,
     rtracklayer,
+    GenomeInfoDb,
     ggplot2,
     gridExtra,
     methods,
     igraph,
-    plotrix
+    plotrix,
+    S4Vectors,
+    dplyr
 Suggests:
     knitr,
     BiocStyle,
-    BSgenome.Hsapiens.UCSC.hg19,
-    BSgenome.Mmusculus.UCSC.mm9
+    testthat
 VignetteBuilder: knitr
 Description: R package for handling Genomic interaction data, such as
     ChIA-PET/Hi-C, annotating genomic features with interaction

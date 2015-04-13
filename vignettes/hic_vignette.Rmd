@@ -25,7 +25,7 @@ The data we are using comes from [this paper](http://genome.cshlp.org/content/23
 
 ## Making a GenomicInteractions object
 
-Load the data by specifying the file location and experiment type. An experiment name and description are also required. A reference genome is required for constructing the GenomicInteractions object.
+Load the data by specifying the file location and experiment type.  You can also include an experiment name and description. 
 
 ```{r imports, warning=F, results="hide", message=FALSE}
 library(GenomicInteractions)
@@ -36,35 +36,40 @@ library(BSgenome.Mmusculus.UCSC.mm9)
 hic_file <- system.file("extdata", "Seitan2013_WT_100kb_interactions.txt", 
                         package="GenomicInteractions")
 
-hic_data <- GenomicInteractions(hic_file, 
+hic_data <- makeGenomicInteractionsFromFile(hic_file, 
                     type="homer", 
                     experiment_name = "HiC 100kb", 
-                    description = "HiC 100kb resolution",
-                    gname="BSgenome.Mmusculus.UCSC.mm9")
+                    description = "HiC 100kb resolution")
+seqlengths(hic_data) <- c(chr15 = 103494974, chr14 = 125194864)
 ```
 
-The `GenomicInteractions` object consists of two linked `GenomicRanges` objects containing the anchors of each interaction, as well as the number of reads supporting each interaction. In addition, p-values and FDRs from the input file are stored. Note that importing data of type 'homer' will always give a warning `Name partially matched in data frame`. This is because the name of the column containing the calculated FDR will contain the total number of interactions, which will be different for each experiment, so we cannot match the column name exactly.
+The `GenomicInteractions` object consists of two linked `GenomicRanges` objects containing the anchors of each interaction, and the number of reads supporting each interaction. Metadata for each interaction (in this case, p-values and FDRs) is stored as a `DataFrame` accessed by `mcols()` or `elementMetadata()`, similar to the metadata of a simple `GRanges`. You can also access single metadata columns using `$`.
+
+```{r}
+hic_data
+mcols(hic_data)
+head(hic_data$fdr)
+```
 
 We can check that the anchors are of the expected size (100kb).
 
-```{r }
+```{r}
 summary(width(anchorOne(hic_data)))
 summary(width(anchorTwo(hic_data)))
-hic_data
 ```
 
-Some anchors are shorter than 100kb due to the bin being at the end of a chromosome. There are `r length(hic_data)` interactions in total, with a total of `r sum(count(hic_data))` reads supporting them. To calculate the average number of reads per interaction, first use `count()` to get the count of reads supporting each individual interaction. 
+Some anchors are shorter than 100kb due to the bin being at the end of a chromosome. There are `r length(hic_data)` interactions in total, with a total of `r sum(interactionCounts(hic_data))` reads supporting them. To calculate the average number of reads per interaction, first use `interactionCounts()` to get the interactionCounts of reads supporting each individual interaction. 
 
 ```{r}
-head(count(hic_data))
-mean(count(hic_data))
+head(interactionCounts(hic_data))
+mean(interactionCounts(hic_data))
 ```
 
 However, since we have FDRs and p-values, it is probably more informative to use these to find interactions of interest.
 
 ```{r}
-plot(density(pValue(hic_data)))
-plot(density(FDR(hic_data)))
+plot(density(hic_data$p.value))
+plot(density(hic_data$fdr))
 ```
 
 ## Summary statistics
@@ -72,8 +77,8 @@ plot(density(FDR(hic_data)))
 The package provides some functions to plot summary statistics of your data that may be of interest, such as the percentage of interactions that are between regions on the same chromosome (_cis_-interactions) or on different chromosomes (_trans_-interactions), or the number of reads supporting each interaction. These plots can be used to assess the level of noise in your dataset - the presence of many interactions with high FDRs or low read counts suggests that the data may be noisy and contain a lot of false positive interactions. You can subset the GenomicInteractions object by FDR or by number of reads.
 
 ```{r}
-sum(FDR(hic_data) < 0.1)
-hic_data_subset <- hic_data[FDR(hic_data) < 0.1]
+sum(hic_data$fdr < 0.1)
+hic_data_subset <- hic_data[hic_data$fdr < 0.1]
 ```
 
 ```{r}
@@ -154,14 +159,14 @@ sum(is.trans(hic_data_subset))
 To find the strongest promoter--distal interaction:
 ```{r}
 hic_data_pd <- hic_data_subset[is.pd(hic_data_subset)]
-max(count(hic_data_pd))
-most_counts <- hic_data_pd[which.max(count(hic_data_pd))]
+max(interactionCounts(hic_data_pd))
+most_counts <- hic_data_pd[which.max(interactionCounts(hic_data_pd))]
 most_counts
 ```
 Or the most significant promoter--distal interaction:
 ```{r}
-min(pValue(hic_data_pd))
-min_pval <- hic_data_pd[which.min(pValue(hic_data_pd))]
+min(hic_data_pd$p.value)
+min_pval <- hic_data_pd[which.min(hic_data_pd$p.value)]
 min_pval
 ```
 
@@ -194,7 +199,7 @@ The interactions can be exported to [BED12 format](http://bedtools.readthedocs.o
 
 ```{r, eval=FALSE}
 ## Not run
-export.bed12(hic_data_subset, fn="hic_data_FDR0.1.bed")
+export.bed12(hic_data_subset, fn="hic_data_FDR0.1.bed", drop.trans = TRUE)
 ```
 
 ## References

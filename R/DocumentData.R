@@ -36,7 +36,8 @@ NULL
 #' @keywords datasets
 #' @usage data(mm9_refseq_promoters)
 #' @format A GRanges object with length 2441.
-#' @format a GRanges object
+#' @format A GRanges object
+#' @return A GRanges object.
 NULL
 
 #' Human Refseq transcripts from chr 17-18
@@ -51,5 +52,6 @@ NULL
 #' @keywords datasets
 #' @usage data(hg19.refseq.transcripts)
 #' @format A GRanges object with length 2441.
-#' @format a GRanges object
+#' @format A GRanges object
+#' @return A GRanges object.
 NULL
