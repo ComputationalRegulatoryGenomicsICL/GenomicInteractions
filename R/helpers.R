@@ -248,7 +248,6 @@ setMethod("overlapsAny", c("GRanges", "GenomicInteractions"),
                               maxgap=maxgap, minoverlap=minoverlap, type=type, 
                               select=select, ignore.strand = ignore.strand)
               ))
->>>>>>> development
 })
 
 #' @rdname GenomicInteractions-overlaps-methods
@@ -286,7 +285,6 @@ setMethod("seqinfo", "GenomicInteractions", function(x) {
         stop(paste("Seqinfo differs between anchors in", objName))
     }
     return(seqinfo(anchorOne(x)))
->>>>>>> development
 })
 
 #' @param new2old Mapping between new and old seqnames. See ?seqinfo in GenomeInfoDb for details.
