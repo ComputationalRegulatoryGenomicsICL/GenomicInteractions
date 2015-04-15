@@ -6,7 +6,7 @@ Version: 1.1.0
 Date: 2014-07-14
 Author: Harmston, N., Ing-Simmons, E., Perry, M., Baresic, A., Lenhard,
     B.
-Maintainer: Malcolm Perry <mgperry32@gmail.com>, 
+Maintainer: Malcolm Perry <mgperry32@gmail.com>,
     Liz Ing-Simmons <liz.ing-simmons12@csc.mrc.ac.uk>
 Imports:
     Rsamtools,
