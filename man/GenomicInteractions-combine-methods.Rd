@@ -3,14 +3,14 @@
 \docType{methods}
 \name{c}
 \alias{c}
-\alias{c,GenomicInteractions}
+\alias{c,GenomicInteractions-method}
 \title{Combine GenomicInteractions Methods}
 \usage{
 \S4method{c}{GenomicInteractions}(x, ..., ignore.mcols = FALSE,
   recursive = FALSE)
 }
 \arguments{
-\item{x,}{... GenomicInteractions objects to be concatenated}
+\item{x,...}{GenomicInteractions objects to be concatenated}
 
 \item{ignore.mcols}{Logical, default FALSE, remove mcols in combined object.}
 

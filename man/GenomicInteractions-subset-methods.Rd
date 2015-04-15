@@ -3,7 +3,7 @@
 \docType{methods}
 \name{[}
 \alias{[}
-\alias{[,GenomicInteractions-method}
+\alias{[,GenomicInteractions,ANY,ANY-method}
 \title{Standard subsetting methods for GenomicInteractions objects}
 \usage{
 \S4method{[}{GenomicInteractions,ANY,ANY}(x, i, j, drop)
@@ -12,6 +12,10 @@
 \item{x}{A genomicInteractions object}
 
 \item{i}{A numeric, logical or Rle vector}
+
+\item{j}{A numeric or logical vector}
+
+\item{drop}{Logical. If TRUE, result is coerced to lowest possible dimension.}
 }
 \value{
 A GenomicInteractions object containing only the features specified by `i`.

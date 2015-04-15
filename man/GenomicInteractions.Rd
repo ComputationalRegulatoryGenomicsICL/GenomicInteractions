@@ -8,7 +8,7 @@ GenomicInteractions(anchor_one = GRanges(), anchor_two = GRanges(),
   counts = integer(), experiment_name = NULL, description = NULL, ...)
 }
 \arguments{
-\item{anchor_one,}{anchor_two GRanges objects.}
+\item{anchor_one,anchor_two}{GRanges objects.}
 
 \item{counts}{An integer vector, defaults to 1.}
 
@@ -25,8 +25,10 @@ a GenomicInteractions object
 Create GenomicInteraction objects from two GRanges ojects.
 }
 \examples{
-anchor.one = GRanges(c("chr1", "chr1", "chr1", "chr1"), IRanges(c(10, 20, 30, 20), width=5), seqlengths=seqlengths(Mmusculus))
-anchor.two = GRanges(c("chr1", "chr1", "chr1", "chr2"), IRanges(c(100, 200, 300, 50), width=5), seqlengths=seqlengths(Mmusculus))
+library(GenomicRanges)
+
+anchor.one = GRanges(c("chr1", "chr1", "chr1", "chr1"), IRanges(c(10, 20, 30, 20), width=5))
+anchor.two = GRanges(c("chr1", "chr1", "chr1", "chr2"), IRanges(c(100, 200, 300, 50), width=5))
 interaction_counts = sample(1:10, 4)
 test <- GenomicInteractions(anchor.one, anchor.two, experiment_name="test",
                            description="this is a test", counts=interaction_counts)

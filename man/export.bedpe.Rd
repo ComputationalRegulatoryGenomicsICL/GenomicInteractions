@@ -16,7 +16,7 @@ export.bedpe(GIObject, fn = NULL, score = "counts")
 
 \item{fn}{A filename to write the interactions data to}
 
-\item{score_field}{Which metadata column to use as score}
+\item{score}{Which metadata column to use as score}
 }
 \value{
 invisible(1) if outputting to file or a data.frame containing all of the corresponding information

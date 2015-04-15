@@ -49,7 +49,7 @@
 
 \item{subject}{GRanges or GenomicInteractions}
 
-\item{maxgap,minoverlap,type,select,algorithm}{See 'findOverlaps' in the IRanges package.}
+\item{maxgap,minoverlap,type,select,ignore.strand}{See 'findOverlaps' in the IRanges package.}
 }
 \value{
 A Hits object or a list containing Hits objects for both anchors.

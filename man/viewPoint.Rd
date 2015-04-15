@@ -25,6 +25,7 @@ Some explanation needed
 \examples{
 \dontrun{
 data(hic_data)
+library(GenomicRanges)
 pos <- GRanges(seqnames="chr5", ranges=IRanges(start=115938063, end=115941352))
 region <- GRanges(seqnames="chr5", ranges=IRanges(start=115838063, end=116041352))
 viewPoint(hic_data, pos, region)

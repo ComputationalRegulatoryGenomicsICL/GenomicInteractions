@@ -2,6 +2,8 @@
 #'
 #' @param GIObject  A GenomicInteractions object.
 #' @param fn        A filename to write the object to
+#' @param score     Which metadata column to export as score
+#' @param drop.trans Logical indicating whether to allow dropping trans interactions (otherwise an error is produced)
 #'
 #' Exports a GenomicInteractions object to BED12 format, and writes to a specified file. If filename is not specified,
 #' then a data.frame containing the information is returned. Please note some large datasets may take a long time to export.
@@ -11,7 +13,7 @@
 #' @docType methods
 #' @rdname export.bed12
 #' @export
-setGeneric("export.bed12",function(GIObject, fn=NULL, ...){standardGeneric ("export.bed12")})
+setGeneric("export.bed12",function(GIObject, fn=NULL, score="counts", drop.trans=c(FALSE, TRUE)){standardGeneric ("export.bed12")})
 #' @rdname export.bed12
 #' @export
 setMethod("export.bed12", c("GenomicInteractions"),
@@ -20,10 +22,7 @@ setMethod("export.bed12", c("GenomicInteractions"),
             is_trans = is.trans(GIObject)
 
             if (any(is_trans)) {
-                if (drop.trans==TRUE)
-                    warning("trans interactions present in object will be dropped during bed12 export")
-                else
-                    stop("trans interactions present in object and drop.trans == FALSE")
+                if (drop.trans==FALSE) stop("trans interactions present in object and drop.trans == FALSE")
             }
 
             GIObject = sort(GIObject[!is_trans], order.interactions=FALSE)
@@ -66,7 +65,7 @@ setMethod("export.bed12", c("GenomicInteractions"),
 #'
 #' @param GIObject A GenomicInteractions object.
 #' @param fn	   A filename to write the interactions data to
-#' @param score_field    Which metadata column to use as score
+#' @param score    Which metadata column to use as score
 #' @return invisible(1) if outputting to file or a data.frame containing all of the corresponding information
 #'
 #' @export

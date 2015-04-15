@@ -143,7 +143,7 @@ setMethod("sum", "GenomicInteractions", function(x){ return( sum(interactionCoun
 #'
 #' @param query GenomicInteractions or GRanges
 #' @param subject GRanges or GenomicInteractions
-#' @param maxgap,minoverlap,type,select See 'findOverlaps' in the IRanges package.
+#' @param maxgap,minoverlap,type,select,ignore.strand See 'findOverlaps' in the IRanges package.
 #'
 #' @return A Hits object or a list containing Hits objects for both anchors.
 #'

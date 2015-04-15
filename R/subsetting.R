@@ -45,13 +45,15 @@ setMethod("subsetByFeatures", c("GenomicInteractions", "character", "character")
 #' @name [
 #' @param x A genomicInteractions object
 #' @param i A numeric, logical or Rle vector
+#' @param j A numeric or logical vector
+#' @param drop Logical. If TRUE, result is coerced to lowest possible dimension.
 #'
 #' @return A GenomicInteractions object containing only the features specified by `i`.
 #' @rdname GenomicInteractions-subset-methods
 NULL
 
 #' @name [
-#' @aliases [,GenomicInteractions-method
+#' @aliases [,GenomicInteractions,ANY,ANY-method
 #' @docType methods
 #' @rdname GenomicInteractions-subset-methods
 #' @import BiocGenerics
@@ -79,12 +81,12 @@ setMethod(f="[", "GenomicInteractions", function(x, i, j, drop) {
 #' be merged.
 #' 
 #' @name c
-#' @param x, ... GenomicInteractions objects to be concatenated
+#' @param x,... GenomicInteractions objects to be concatenated
 #' @param ignore.mcols Logical, default FALSE, remove mcols in combined object.
 #' @param recursive Not supported
 #' @return A GenomicInteractions object.
 #'
-#' @aliases c,GenomicInteractions
+#' @aliases c,GenomicInteractions-method
 #' @docType methods
 #' @rdname GenomicInteractions-combine-methods
 #' @export

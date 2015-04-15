@@ -21,8 +21,8 @@
 #' showClass("GenomicInteractions")
 #' library(GenomicRanges)
 #'
-#' anchor.one = GRanges(c("chr1", "chr1", "chr1", "chr1"), IRanges(c(10, 20, 30, 20), width=5)))
-#' anchor.two = GRanges(c("chr1", "chr1", "chr1", "chr2"), IRanges(c(100, 200, 300, 50), width=5)))
+#' anchor.one = GRanges(c("chr1", "chr1", "chr1", "chr1"), IRanges(c(10, 20, 30, 20), width=5))
+#' anchor.two = GRanges(c("chr1", "chr1", "chr1", "chr2"), IRanges(c(100, 200, 300, 50), width=5))
 #' interaction_counts = sample(1:10, 4)
 #' test <- GenomicInteractions(anchor.one, anchor.two, experiment_name="test", 
 #'                            description="this is a test", counts=interaction_counts)
@@ -57,7 +57,7 @@ setClass("GenomicInteractions",
 #'
 #' Create GenomicInteraction objects from two GRanges ojects.
 #'
-#' @param anchor_one, anchor_two GRanges objects.
+#' @param anchor_one,anchor_two GRanges objects.
 #' @param counts An integer vector, defaults to 1.
 #' @param experiment_name Experiment name.
 #' @param description Description of experiment.
@@ -65,8 +65,11 @@ setClass("GenomicInteractions",
 #' @return a GenomicInteractions object
 #'
 #' @examples
-#' anchor.one = GRanges(c("chr1", "chr1", "chr1", "chr1"), IRanges(c(10, 20, 30, 20), width=5), seqlengths=seqlengths(Mmusculus))
-#' anchor.two = GRanges(c("chr1", "chr1", "chr1", "chr2"), IRanges(c(100, 200, 300, 50), width=5), seqlengths=seqlengths(Mmusculus))
+#' 
+#' library(GenomicRanges)
+#'
+#' anchor.one = GRanges(c("chr1", "chr1", "chr1", "chr1"), IRanges(c(10, 20, 30, 20), width=5))
+#' anchor.two = GRanges(c("chr1", "chr1", "chr1", "chr2"), IRanges(c(100, 200, 300, 50), width=5))
 #' interaction_counts = sample(1:10, 4)
 #' test <- GenomicInteractions(anchor.one, anchor.two, experiment_name="test", 
 #'                            description="this is a test", counts=interaction_counts)
@@ -112,10 +115,21 @@ setMethod(length, "GenomicInteractions", function(x) length(x@anchor_one))
 
 # Quick access to mcols()
 
+#' Quick access to GenomicInteractions metadata columns
+#'
+#' @param x A GenomicInteractions object
+#' @param name Column to select
+#' @param value Replacement value
+#' @return A vector containing the contents of the column
+#' @docType methods
+#' @rdname GenomicInteractions-dollar-methods
+#' @export
 setMethod("$", "GenomicInteractions",
     function(x, name) mcols(x)[[name]]
 )
 
+#' @rdname GenomicInteractions-dollar-methods
+#' @export
 setReplaceMethod("$", "GenomicInteractions",
     function(x, name, value) {mcols(x)[[name]] <- value; x}
 )

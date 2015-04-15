@@ -58,6 +58,9 @@ regions larger than 5Mb.
 }
 \examples{
 \dontrun{
+
+library(GenomicRanges)
+
 k562.rep1 = GenomicInteractions(file.path(system.file(package="GenomicInteractions"), "extdata", "k562.rep1.cluster.pet3+.txt"),
                                      type="chiapet.tool",
                                      experiment_name="k562",

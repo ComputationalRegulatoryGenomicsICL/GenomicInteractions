@@ -6,7 +6,8 @@
 \alias{export.bed12,GenomicInteractions-method}
 \title{Export interactions in BED12 format.}
 \usage{
-export.bed12(GIObject, fn = NULL, ...)
+export.bed12(GIObject, fn = NULL, score = "counts", drop.trans = c(FALSE,
+  TRUE))
 
 \S4method{export.bed12}{GenomicInteractions}(GIObject, fn = NULL,
   score = "counts", drop.trans = c(FALSE, TRUE))
@@ -14,7 +15,11 @@ export.bed12(GIObject, fn = NULL, ...)
 \arguments{
 \item{GIObject}{A GenomicInteractions object.}
 
-\item{fn}{A filename to write the object to
+\item{fn}{A filename to write the object to}
+
+\item{score}{Which metadata column to export as score}
+
+\item{drop.trans}{Logical indicating whether to allow dropping trans interactions (otherwise an error is produced)
 
 Exports a GenomicInteractions object to BED12 format, and writes to a specified file. If filename is not specified,
 then a data.frame containing the information is returned. Please note some large datasets may take a long time to export.}
