@@ -66,7 +66,6 @@
 #' @param anchor.col colour for anchor regions
 #' @return invisible(1)
 #' @importFrom plotrix ablineclip
-#' @export
 #' @examples
 #' 
 #' \dontrun{
@@ -86,12 +85,10 @@
 #' 
 #' @docType methods
 #' @rdname .plotRegion
-##' @export
 setGeneric("plotRegion",function(GIObject, region, annotation.features, annotation.cols=NULL, reduce.anchors=TRUE,
                                  plot.trans=TRUE, plot.cis=TRUE, order.cis=TRUE, plot.cis.names=TRUE, plot.header=TRUE,
                                  plot.lines=TRUE, anchor.col="darkred", plot.ids=FALSE){standardGeneric ("plotRegion")})
 #' @rdname .plotRegion
-##' @export
 setMethod("plotRegion", 
     signature=c("GenomicInteractions", "GRanges", "list"), function(GIObject, region, annotation.features, annotation.cols=NULL, 
                        reduce.anchors=TRUE, plot.trans=TRUE, plot.cis=TRUE, order.cis=TRUE, plot.cis.names=TRUE, plot.header=TRUE,
