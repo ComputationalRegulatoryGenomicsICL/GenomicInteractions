@@ -29,7 +29,7 @@ Load the data by specifying the file location and experiment type.  You can also
 
 ```{r imports, warning=F, results="hide", message=FALSE}
 library(GenomicInteractions)
-library(BSgenome.Mmusculus.UCSC.mm9)
+library(GenomicRanges)
 ```
 
 ```{r}
