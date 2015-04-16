@@ -120,7 +120,7 @@ setGeneric("export.chiasig", function(GIObject, fn=NULL, score="counts"){ standa
 #' @rdname export.chiasig
 #' @export
 setMethod("export.chiasig", c("GenomicInteractions"), function(GIObject, fn=NULL, score="counts"){
-    score_vec = .getScores(GIObject, score)
+    score_vec = .getScore(GIObject, score)
     output = cbind(as.character(seqnames(anchorOne(GIObject))),
                     start(anchorOne(GIObject))-1,
                     end(anchorOne(GIObject)),

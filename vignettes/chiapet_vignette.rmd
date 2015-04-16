@@ -38,7 +38,7 @@ First we need to load the GenomicInteractions package, and the mm9 reference gen
 
 ```{r imports, warning=F, results="hide"}
 library(GenomicInteractions)
-library(BSgenome.Hsapiens.UCSC.hg19) 
+library(GenomicRanges)
 ```
 
 ## Data
@@ -57,11 +57,10 @@ that are being actively transcribed.
 chiapet.data = system.file("extdata/k562.rep1.cluster.pet3+.txt", 
                            package="GenomicInteractions")
 
-k562.rep1 = GenomicInteractions(chiapet.data, 
+k562.rep1 = makeGenomicInteractionsFromFile(chiapet.data, 
                                 type="chiapet.tool", 
                                 experiment_name="k562", 
-                                description="k562 pol2 8wg16", 
-                                gname="BSgenome.Hsapiens.UCSC.hg19")
+                                description="k562 pol2 8wg16")
 ```
 
 This loads the data into a `GenomicInteractions` object, which consists of two
@@ -74,16 +73,15 @@ The metadata we have added can easily be accesed, and edited:
 
 ```{r metadata}
 name(k562.rep1)
-genomeName(k562.rep1)
 description(k562.rep1) = "PolII-8wg16 Chia-PET for K562"
 ```
 
 As can the data from the ChIA-PET experiment:
 
 ```{r gi_data_access}
-head(count(k562.rep1))
-head(FDR(k562.rep1))
-hist(-log10(pValue(k562.rep1)))
+head(interactionCounts(k562.rep1))
+head((k562.rep1)$fdr)
+hist(-log10(k562.rep1$p.value))
 ```
 
 The two linked `GRanges` objects can be returned, but not altered in-place:
@@ -138,7 +136,7 @@ We can also subset based on the properties of the linked `GRanges` objects.
 
 ```{r subset_chr}
 chrom = c("chr17", "chr18")
-sub = seqnames(anchorOne(k562.rep1)) %in% chrom & seqnames(anchorTwo(k562.rep1)) %in% chrom
+sub = as.vector(seqnames(anchorOne(k562.rep1)) %in% chrom & seqnames(anchorTwo(k562.rep1)) %in% chrom)
 k562.rep1 = k562.rep1[sub]
 ```
 

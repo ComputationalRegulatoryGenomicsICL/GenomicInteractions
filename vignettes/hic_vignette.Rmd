@@ -178,21 +178,6 @@ calculateDistances(min_pval,method="midpoint")
 summary(calculateDistances(hic_data_subset,method="midpoint"))
 ```
 
-## Virtual 4C plots
-
-There are functions available to plot a "virtual 4C" plot of all interactions involving a region of interest, e.g. a specific promoter, or around a set of positions, e.g. all CTCF binding sites. These can be used to visualise interactions between a promoter of interest and its regulatory elements, or to summarise the interactions of a particular node class. The argument `flip = TRUE` can be used to flip coverage according to the strand of the region of interest. For example, the interactions around a set of promoters are plotted below. When `flip = TRUE` a slight bias towards downstream interactions is visible. This may be because of promoters interacting with the transcription termination site of the same gene or with intronic enhancers. 
-
-```{r}
-viewPoint(mm9_refseq_promoters[1], hic_data_subset, leftflank = 2000000, rightflank = 2000000)
-
-set.seed(42)
-promoter_subset <- sample(mm9_refseq_promoters, 20)
-viewPointAverage(promoter_subset, hic_data_subset, 
-                             leftflank = 1000000, rightflank = 1000000)
-viewPointAverage(promoter_subset, hic_data_subset, 
-                             leftflank = 1000000, rightflank = 1000000, flip = TRUE)
-```
-
 ## Export to BED12 format
 
 The interactions can be exported to [BED12 format](http://bedtools.readthedocs.org/en/latest/content/general-usage.html) for viewing in a genome browser. Anchors are visualised as thick blocks connected by thinner interactions. 
