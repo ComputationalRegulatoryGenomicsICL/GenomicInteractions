@@ -160,7 +160,7 @@ First we need the list of RefSeq transcripts:
 ```{r annotation_features, eval=F}
 library(GenomicFeatures)
 
-hg19.refseq.db <- makeTranscriptDbFromUCSC(genome="hg19", table="refGene")
+hg19.refseq.db <- makeTxDbFromUCSC(genome="hg19", table="refGene")
 refseq.genes = genes(hg19.refseq.db)
 refseq.transcripts = transcriptsBy(hg19.refseq.db, by="gene")
 non_pseudogene = names(refseq.transcripts) %in% unlist(refseq.genes$gene_id) 

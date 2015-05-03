@@ -100,7 +100,7 @@ Genome annotation data can be obtained from, for example, UCSC databases using t
 ```{r eval=FALSE}
 ## Not run
 library(GenomicFeatures)
-mm9.refseq.db <- makeTranscriptDbFromUCSC(genome="mm9", table="refGene")
+mm9.refseq.db <- makeTxDbFromUCSC(genome="mm9", table="refGene")
 refseq.genes = genes(mm9.refseq.db)
 refseq.transcripts = transcriptsBy(mm9.refseq.db, by="gene")
 refseq.transcripts = refseq.transcripts[ names(refseq.transcripts) %in% unlist(refseq.genes$gene_id) ] 
