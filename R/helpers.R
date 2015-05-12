@@ -73,8 +73,8 @@ setMethod("is.pd", "GenomicInteractions",
 #' @export
 setMethod("is.pt", "GenomicInteractions",
             function(GIObject){
-                return( (GIObject@anchor_one$node.class == "distal" & GIObject@anchor_two$node.class == "terminator" ) |
-                        (GIObject@anchor_one$node.class == "terminator" & GIObject@anchor_two$node.class == "distal" ))
+                return( (GIObject@anchor_one$node.class == "distal" & GIObject@anchor_two$node.class == "promoter" ) |
+                        (GIObject@anchor_one$node.class == "promoter" & GIObject@anchor_two$node.class == "distal" ))
             })
 
 #' @rdname InteractionHelpers
@@ -89,7 +89,7 @@ setMethod("is.dd", "GenomicInteractions",
 setMethod("is.dt", "GenomicInteractions",
             function(GIObject){
                 return( (GIObject@anchor_one$node.class == "distal" & GIObject@anchor_two$node.class == "terminator" ) |
-                        (GIObject@anchor_one$node.class == "distal" & GIObject@anchor_two$node.class == "terminator" ))
+                        (GIObject@anchor_one$node.class == "terminator" & GIObject@anchor_two$node.class == "distal" ))
             })
 
 #' @rdname InteractionHelpers
@@ -441,4 +441,68 @@ setMethod("print", "GenomicInteractions", function(x){
 setMethod("show", "GenomicInteractions", function(object){
     showGenomicInteractions(object, margin="  ", print.seqinfo=TRUE)
 })
+
+
+.duplicated.GenomicInteractions <- function(x, fromLast=FALSE, dropMetadata = FALSE)
+{
+  if (dropMetadata == TRUE){
+    dat <- cbind(as.data.frame(unname(anchorOne(x))), #duplicated names ok for GRanges but not for df 
+                as.data.frame(unname(anchorTwo(x))), 
+                interactionCounts(x))
+  } else if (dropMetadata == FALSE){
+    dat <- cbind(as.data.frame(unname(anchorOne(x))), #duplicated names ok for GRanges but not for df 
+                 as.data.frame(unname(anchorTwo(x))), 
+                 interactionCounts(x),
+                 mcols(x))
+  } else {
+    stop("dropMetadata must be TRUE or FALSE")
+  }
+  return(duplicated(dat, incomparables = FALSE, 
+                    fromLast = fromLast))
+}
+
+#' duplicated, GenomicInteractions-method
+#' 
+#' Finds duplicated interactions in a GenomicInteractions object. 
+#' 
+#' Uniqueness is based on anchor positions and metadata, interaction counts, and
+#' interaction metadata.
+#'
+#' @param x A GenomicInteractions object
+#' @param fromLast Whether to identify duplicates starting from last item in the 
+#'        Genomicinteractions object or not. Default: FALSE.
+#' @param dropMetadata Logical, default FALSE. Whether to drop interaction mcols 
+#'        when considering unique interactions.
+#' @return A vector containing indices of duplicated interactions
+#' @docType methods
+#' @export
+setMethod("duplicated", "GenomicInteractions", .duplicated.GenomicInteractions)
+
+.unique.GenomicInteractions <- function(x, dropMetadata = FALSE)
+{
+  idx <- !duplicated(x, dropMetadata = dropMetadata)
+  return(x[idx])
+}
+
+#' unique, GenomicInteractions-method
+#' 
+#' Finds unique interactions in a GenomicInteractions object. 
+#' 
+#' Uniqueness is based on anchor positions and metadata, interaction counts, and
+#' interaction metadata (unless dropMetadata is TRUE)
+#'
+#' @param x GenomicInteractionsObject
+#' @param dropMetadata Logical, default FALSE. Whether to drop interaction mcols 
+#'        when considering unique interactions.
+#' @return A GenomicInteractions object
+#' @docType methods
+#' @export
+#' @examples
+#' 
+#' library(GenomicInteractions)
+#' 
+#' data(hic_example_data)
+#' unique(hic_example_data[c(1:4, 1:5)])
+
+setMethod("unique", "GenomicInteractions", .unique.GenomicInteractions)
 
