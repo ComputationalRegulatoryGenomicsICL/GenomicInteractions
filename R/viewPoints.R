@@ -62,6 +62,9 @@ viewPoint = function(x, bait, region=NULL, ...) {
 #'
 #' @param x a GenomicInteractions object which is output from viewPoint
 #' @param region The genomic region to plot
+#' @param ylab Y axis label.
+#' @param xlab X axis label. By default this is the chromosome of the region 
+#' that is being plotted.
 #' @param ... additional arguments to plot
 #' 
 #' @return output of plot()
