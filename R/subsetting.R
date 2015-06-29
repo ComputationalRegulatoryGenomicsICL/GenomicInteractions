@@ -64,10 +64,11 @@ setMethod(f="[", "GenomicInteractions", function(x, i, j, drop) {
             ans_anchor_two = x@anchor_two[i]
             ans_counts = x@counts[i]
             ans_mcols = mcols(x)[i, ,drop=FALSE]
-            x = BiocGenerics:::updateS4(x, anchor_one=ans_anchor_one,
-                                        anchor_two=ans_anchor_two,
-                                        counts=ans_counts,
-                                        elementMetadata=ans_mcols)
+            x = BiocGenerics:::replaceSlots(x,
+                    anchor_one=ans_anchor_one,
+                    anchor_two=ans_anchor_two,
+                    counts=ans_counts,
+                    elementMetadata=ans_mcols)
         }
         if (!missing(j))
             mcols(x) = mcols(x)[ , j, drop=FALSE]

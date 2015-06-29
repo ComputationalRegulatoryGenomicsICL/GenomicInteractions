@@ -313,8 +313,10 @@ setReplaceMethod("seqinfo", "GenomicInteractions", function(x, new2old=NULL, for
     old_seqinfo = seqinfo(x)
     new_seqnames_one <- GenomeInfoDb:::makeNewSeqnames(anchorOne(x), new2old=new2old, seqlevels(value))
     new_seqnames_two <- GenomeInfoDb:::makeNewSeqnames(anchorTwo(x), new2old=new2old, seqlevels(value))
-    x@anchor_one = BiocGenerics:::updateS4(anchorOne(x), seqnames=new_seqnames_one, seqinfo=value, check=FALSE)
-    x@anchor_two = BiocGenerics:::updateS4(anchorTwo(x), seqnames=new_seqnames_two, seqinfo=value, check=FALSE)
+    x@anchor_one = BiocGenerics:::replaceSlots(anchorOne(x),
+                       seqnames=new_seqnames_one, seqinfo=value, check=FALSE)
+    x@anchor_two = BiocGenerics:::replaceSlots(anchorTwo(x),
+                       seqnames=new_seqnames_two, seqinfo=value, check=FALSE)
     # check for object validity? need valid.GenomicInteractions.seqinfo method ?
     return(x)
 })
@@ -347,7 +349,9 @@ setMethod("sort", "GenomicInteractions", function(x, decreasing=FALSE, order.int
           one.rev = anchor.one[reversed]
           anchor.one[reversed] = anchor.two[reversed]
           anchor.two[reversed] = one.rev
-          x <- BiocGenerics:::updateS4(x, anchor_one=anchor.one, anchor_two=anchor.two)
+          x <- BiocGenerics:::replaceSlots(x,
+                   anchor_one=anchor.one,
+                   anchor_two=anchor.two)
           if (order.interactions==TRUE) {
             i = order(anchor.one, decreasing=decreasing)
             x = x[i]
