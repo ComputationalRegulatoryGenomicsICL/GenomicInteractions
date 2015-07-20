@@ -193,63 +193,66 @@ setMethod(".calculateDistances.df", c("data.frame", "data.frame"),
 #' 
 #' data(hic_example_data)
 #' data(mm9_refseq_promoters)
-#' \dontrun{
-#' annotateInteractions(hic_example_data, list(promoter=mm9_refseq_promoters))
-#' }
+#' mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)
+#' annotateInteractions(hic_example_data, list(promoter=mm9_refseq_grl))
 setGeneric("annotateInteractions",function(GIObject, annotations){standardGeneric ("annotateInteractions")})
 #' @rdname annotateInteractions
 #' @export
 setMethod("annotateInteractions", c("GenomicInteractions", "list"), 
             function(GIObject, annotations){
                 objName = deparse(substitute(GIObject))
-                GIObject@anchor_one$node.class = NA
-                GIObject@anchor_two$node.class = NA
-                
+                mcols.one = mcols(GIObject@anchor_one)
+                mcols.two = mcols(GIObject@anchor_two)
+                mcols.one$node.class = NA
+                mcols.two$node.class = NA
+
                 if (is.null(names(annotations))){
                   names(annotations) <- paste0("FEATURE", 1:length(annotations))
                 }
 
+                feature_names_list = lapply(annotations, .get_gr_names)
+                if (any(vapply(feature_names_list, function(x) any(duplicated(x)), logical(1)))) {
+                    warning("Some features contain duplicate IDs which will result duplicate annotations")
+                }
+
                 for(name in names(annotations)){
                     message(paste("Annotating with", name, "..."))
-                    elementMetadata(GIObject@anchor_one)[[paste(name, "id", sep=".")]] = NA
-                    elementMetadata(GIObject@anchor_two)[[paste(name, "id", sep=".")]] = NA
-                    one.ol = findOverlaps( GIObject@anchor_one, annotations[[name]])
-                    two.ol = findOverlaps( GIObject@anchor_two, annotations[[name]])
-                    
-                    if(class(annotations[[name]])=="GRanges"){ 
-                    # GRanges for annotation must have an id column or have names set
-                        if(!is.null(names(annotations[[name]]))){
-                            elementMetadata( GIObject@anchor_one)[[ paste(name, "id", sep=".")]][ unique(queryHits(one.ol)) ] = 
-                                lapply(unique(queryHits(one.ol)), function(x){ unique(names(annotations[[name]])[unique(subjectHits(one.ol[ queryHits(one.ol) == x]))])})
-                            elementMetadata( GIObject@anchor_two)[[ paste(name, "id", sep=".")]][ unique(queryHits(two.ol)) ] = 
-                                lapply(unique(queryHits(two.ol)), function(x){ unique(names(annotations[[name]])[unique(subjectHits(two.ol[ queryHits(two.ol) == x]))])})
-                        }else if("id" %in% names(mcols(annotations[[name]]))){
-                            elementMetadata( GIObject@anchor_one)[[ paste(name, "id", sep=".")]][ unique(queryHits(one.ol)) ] = 
-                                lapply(unique(queryHits(one.ol)), function(x){ unique(annotations[[name]]$id[unique(subjectHits(one.ol[ queryHits(one.ol) == x]))])})
-                            elementMetadata( GIObject@anchor_two)[[ paste(name, "id", sep=".")]][ unique(queryHits(two.ol)) ] = 
-                                lapply(unique(queryHits(two.ol)), function(x){ unique(annotations[[name]]$id[unique(subjectHits(two.ol[ queryHits(two.ol) == x]))])})
-                        }else{
-                            stop("annotations requires an id column in elementMetadata or names to be non-null")
-                        }
-                    }else if(class(annotations[[name]])=="GRangesList"){
-                      # GRangesList names must be ids for the regions
-                      elementMetadata( GIObject@anchor_one)[[ paste(name, "id", sep=".")]][ unique(queryHits(one.ol)) ] = 
-                          lapply(unique(queryHits(one.ol)), function(x){ names(annotations[[name]])[unique(subjectHits(one.ol[ queryHits(one.ol) == x]))]})
-                      elementMetadata( GIObject@anchor_two)[[ paste(name, "id", sep=".")]][ unique(queryHits(two.ol)) ] = 
-                          lapply(unique(queryHits(two.ol)), function(x){ names(annotations[[name]])[unique(subjectHits(two.ol[ queryHits(two.ol) == x]))]})
-                    }  
-                    GIObject@anchor_one$node.class = ifelse(is.na(GIObject@anchor_one$node.class) & !is.na(elementMetadata( GIObject@anchor_one)[[ paste(name, "id", sep=".")]]), 
-                                                            name, 
-                                                            GIObject@anchor_one$node.class)
-                    GIObject@anchor_two$node.class = ifelse(is.na(GIObject@anchor_two$node.class) & !is.na(elementMetadata( GIObject@anchor_two)[[ paste(name, "id", sep=".")]]), 
-                                                            name, 
-                                                            GIObject@anchor_two$node.class)  
+                    field_name = paste(name, "id", sep=".")
+                    feature_names = feature_names_list[[name]]
+                    mcols.one[[field_name]] = NA
+                    mcols.two[[field_name]] = NA
+                    one.ol = findOverlaps(GIObject@anchor_one, annotations[[name]])
+                    two.ol = findOverlaps(GIObject@anchor_two, annotations[[name]])
+                    mcols.one[[field_name]][ unique(queryHits(one.ol)) ] = split(feature_names[ subjectHits(one.ol) ], queryHits(one.ol) )
+                    mcols.two[[field_name]][ unique(queryHits(two.ol)) ] = split(feature_names[ subjectHits(two.ol) ], queryHits(two.ol) )
+                    mcols.one$node.class = ifelse(is.na(mcols.one$node.class) & !is.na(mcols.one[[field_name]]), name, mcols.one$node.class)
+                    mcols.two$node.class = ifelse(is.na(mcols.two$node.class) & !is.na(mcols.two[[field_name]]), name, mcols.two$node.class)
                 }
-                GIObject@anchor_one$node.class = ifelse(is.na(GIObject@anchor_one$node.class), "distal", GIObject@anchor_one$node.class)
-                GIObject@anchor_two$node.class = ifelse(is.na(GIObject@anchor_two$node.class), "distal", GIObject@anchor_two$node.class)
+
+                mcols.one$node.class = ifelse(is.na(mcols.one$node.class), "distal", mcols.one$node.class)
+                mcols.two$node.class = ifelse(is.na(mcols.two$node.class), "distal", mcols.two$node.class)
+                mcols(GIObject@anchor_one) = mcols.one
+                mcols(GIObject@anchor_two) = mcols.two
                 assign(objName, GIObject, envir = parent.frame())
                 return(invisible(1))
 })
+
+.get_gr_names = function(x) {
+    if (class(x)=="GRanges") { 
+        if (!is.null(names(x))) {
+            value = names(x)
+        } else if("id" %in% names(mcols(x))) {
+            value = x$id
+        } else {
+            stop("annotations requires an id column in elementMetadata or names to be non-null")
+        }
+    } else if(class(x)=="GRangesList") {
+        value = names(x)
+    } else {
+        stop("annotations must be GRanges or GRangesList objects")
+    }
+    as.character(value)
+}
 
 #' Summary statistics of interactions for a given feature set
 #'
@@ -280,20 +283,45 @@ setGeneric("summariseByFeatures",function(GIObject, features, feature.name, dist
 setMethod("summariseByFeatures", "GenomicInteractions", 
           function(GIObject, features, feature.name, distance.method="midpoint", annotate.self=FALSE){  
                 if(!("node.class" %in% names(elementMetadata(GIObject@anchor_one))) | !("node.class" %in% names(elementMetadata(GIObject@anchor_two)))){stop("GIObject has not been annotated")}
-                    potential.node.classes = unique(c(GIObject@anchor_one$node.class, GIObject@anchor_two$node.class))
-                    summary.df = data.frame(matrix(0, ncol=(5 + (length(potential.node.classes) * 2) + ifelse(annotate.self, (length(potential.node.classes)-1) * 2, 0) + 5), nrow=length(features)))
-                    summary.names = c(paste(capitalize(feature.name), "id", sep="."), 
-                    paste("numberOf", capitalize(feature.name), "Interactions", sep=""),
-                    paste("numberOf", capitalize(feature.name), "UniqueInteractions", sep=""),
-                    paste("numberOf", capitalize(feature.name), "InterChromosomalInteractions", sep=""),
-                    paste("numberOf", capitalize(feature.name), "UniqueInterChromosomalInteractions", sep=""),
-                    paste("numberOf", capitalize(feature.name), capitalize(potential.node.classes), "Interactions", sep=""),
-                    paste("numberOfUnique", capitalize(feature.name), capitalize(potential.node.classes), "Interactions", sep=""),
-                    paste(capitalize(feature.name), "DistanceMedian", sep=""),
-                    paste(capitalize(feature.name), "DistanceMean", sep=""),
-                    paste(capitalize(feature.name), "DistanceMinimum", sep=""),
-                    paste(capitalize(feature.name), "DistanceMaximum", sep=""),
-                    paste(capitalize(feature.name), "DistanceWeightedMedian", sep=""))
+                
+                potential.node.classes = unique(c(GIObject@anchor_one$node.class, GIObject@anchor_two$node.class))
+                
+                feature.names = NULL
+                feature.names.full = NULL
+                
+                if(class(features) == "GRangesList"){
+                  feature.names = unique(names(features))
+                  feature.names.full = names(features)
+                }else if(class(features) == "GRanges"){
+                  if(!is.null(names(features))){
+                    feature.names = unique(names(features))
+                    feature.names.full = names(features)
+                  }else if(is.null(names(features)) & "id" %in% names(elementMetadata(features))){
+                    feature.names = unique(features$id)
+                    feature.names.full = features$id
+                  }else{
+                    stop("features missing names or an id column")    
+                  }
+                }else{
+                  stop("features must be GRanges object")
+                }
+                
+                summary.df = data.frame(matrix(0, 
+                                               ncol=(5 + (length(potential.node.classes) * 2) + ifelse(annotate.self, (length(potential.node.classes)-1) * 2, 0) + 5), 
+                                               nrow=length(feature.names)))
+                    
+                summary.names = c(paste(capitalize(feature.name), "id", sep="."), 
+                                  paste("numberOf", capitalize(feature.name), "Interactions", sep=""),
+                                  paste("numberOf", capitalize(feature.name), "UniqueInteractions", sep=""),
+                                  paste("numberOf", capitalize(feature.name), "InterChromosomalInteractions", sep=""),
+                                  paste("numberOf", capitalize(feature.name), "UniqueInterChromosomalInteractions", sep=""),
+                                  paste("numberOf", capitalize(feature.name), capitalize(potential.node.classes), "Interactions", sep=""),
+                                  paste("numberOfUnique", capitalize(feature.name), capitalize(potential.node.classes), "Interactions", sep=""),
+                                  paste(capitalize(feature.name), "DistanceMedian", sep=""),
+                                  paste(capitalize(feature.name), "DistanceMean", sep=""),
+                                  paste(capitalize(feature.name), "DistanceMinimum", sep=""),
+                                  paste(capitalize(feature.name), "DistanceMaximum", sep=""),
+                                  paste(capitalize(feature.name), "DistanceWeightedMedian", sep=""))
                 if(annotate.self){    
                     pc= potential.node.classes[ -which(potential.node.classes == "distal")]
                     summary.names = append(summary.names, c( paste("numberOfSelf", capitalize(feature.name), capitalize(pc), "Interactions", sep=""),
@@ -302,22 +330,7 @@ setMethod("summariseByFeatures", "GenomicInteractions",
                 }
                 names(summary.df) = summary.names
 
-                if(class(features) == "GRangesList"){
-                    row.names(summary.df) = names(features)
-                    summary.df[,paste(capitalize(feature.name), "id", sep=".")] = names(features)
-                }else if(class(features) == "GRanges"){
-                    if(!is.null(names(features))){
-                        row.names(summary.df) = names(features)
-                        summary.df[,paste(capitalize(feature.name), "id", sep=".")] = names(features)
-                    }else if(is.null(names(features)) & "id" %in% names(elementMetadata(features))){
-                        row.names(summary.df) = features$id
-                        summary.df[,paste(capitalize(feature.name), "id", sep=".")] = features$id
-                    }else{
-                        stop("features missing names or an id column")    
-                    }
-                }else{
-                    stop("features must be GRanges object")
-                }
+                summary.df[,paste(capitalize(feature.name), "id", sep=".")] = feature.names
                                                                               
                 one.ol = findOverlaps(features, GIObject@anchor_one)
                 two.ol = findOverlaps(features, GIObject@anchor_two)
@@ -325,6 +338,9 @@ setMethod("summariseByFeatures", "GenomicInteractions",
                 two.indexes = queryHits(two.ol)[GIObject@anchor_two[ subjectHits(two.ol) ]$node.class == feature.name] 
                 features.with.interactions.indexes = unique(c(one.indexes, two.indexes))
                 features.with.interactions.indexes = features.with.interactions.indexes[order(features.with.interactions.indexes)]
+                
+                feature.names.with.interactions = feature.names.full[ features.with.interactions.indexes]
+                
                 anchor_one.df = data.frame(seqnames=as.character(seqnames(anchorOne(GIObject))),
                                                             start=start(anchorOne(GIObject)),
                                                              end=end(anchorOne(GIObject)),
@@ -335,10 +351,20 @@ setMethod("summariseByFeatures", "GenomicInteractions",
                                                          end=end(anchorTwo(GIObject)),
                                                          width=width(anchorTwo(GIObject)),
                                                          strand=as.character(strand(anchorTwo(GIObject))),stringsAsFactors=FALSE)
-                for(i in features.with.interactions.indexes){
-                    interactions = unique(c(subjectHits(one.ol[ queryHits(one.ol)==i]), subjectHits(two.ol[ queryHits(two.ol)==i])))
-                    interactions.one = unique(subjectHits(one.ol[ queryHits(one.ol)==i]))
-                    interactions.two = unique(subjectHits(two.ol[ queryHits(two.ol)==i]))
+                #for(i in features.with.interactions.indexes){
+                for(fn in unique(feature.names.with.interactions)){
+                    #print(fn)
+                    i = which(summary.df[,paste(capitalize(feature.name), "id", sep=".")]==fn)
+                    iss = which(feature.names.full==fn)
+                    #print(i)
+                    #if(length(iss)>1){
+                    #  print(fn)
+                    #  print(i)
+                    #  print(iss)
+                    #}
+                    interactions = unique(c(subjectHits(one.ol[ queryHits(one.ol) %in% iss]), subjectHits(two.ol[ queryHits(two.ol) %in% iss])))
+                    interactions.one = unique(subjectHits(one.ol[ queryHits(one.ol) %in% iss]))
+                    interactions.two = unique(subjectHits(two.ol[ queryHits(two.ol) %in% iss]))
                 
                     numberOfInteractions = sum(GIObject@counts[ interactions ])
                     numberOfUniqueInteractions = length(interactions)
@@ -432,3 +458,130 @@ setMethod("summariseByFeatures", "GenomicInteractions",
                 }
               return(summary.df)                                                                                                                                       
 })
+
+
+#' Summarise the number of interactions between two sets of features.
+#' 
+#' This function will calculate the number of observed interactions between
+#' two sets of features provided by the end-user. This allows the summarisation
+#' of the number of features of a specific type a particular region is involved in 
+#' and how many interactions exist between them. 
+#'
+#' @param GIObject An annotated GenomicInteractions object
+#' @param features.one A GRanges object containing the feature set of interest
+#' @param feature.name.one The name of the first feature set of interest
+#' @param features.two A GRanges object containing the second feature set of interest
+#' @param feature.name.two The name of the second feature set of interest
+#'
+#' @return A data frame with one line for each range in `features'
+#' @rdname summariseByFeaturePairs
+#' @docType methods
+#' @import GenomicRanges
+#' @export
+setGeneric("summariseByFeaturePairs",function(GIObject, features.one, feature.name.one, features.two, feature.name.two){standardGeneric ("summariseByFeaturePairs")})
+#' @rdname summariseByFeaturePairs
+#' @export
+setMethod("summariseByFeaturePairs", "GenomicInteractions", 
+          function(GIObject, features.one, feature.name.one, features.two, feature.name.two){  
+            if(!("node.class" %in% names(elementMetadata(GIObject@anchor_one))) | !("node.class" %in% names(elementMetadata(GIObject@anchor_two)))){stop("GIObject has not been annotated")}
+            
+            feature.one.names = NULL
+            feature.one.names.full = NULL
+            
+            if(class(features.one) == "GRangesList"){
+              feature.one.names = unique(names(features.one))
+              feature.one.names.full = names(features.one)
+            }else if(class(features.one) == "GRanges"){
+              if(!is.null(names(features.one))){
+                feature.one.names = unique(names(features.one))
+                feature.one.names.full = names(features.one)
+              }else if(is.null(names(features.one)) & "id" %in% names(elementMetadata(features.one))){
+                feature.one.names = unique(features.one$id)
+                feature.one.names.full = features.one$id
+              }else{
+                stop("features.one missing names or an id column")    
+              }
+            }else{
+              stop("features.one must be GRanges object")
+            }
+            
+            feature.two.names = NULL
+            feature.two.names.full = NULL
+            
+            if(class(features.two) == "GRangesList"){
+              feature.two.names = unique(names(features.two))
+              feature.two.names.full = names(features.two)
+            }else if(class(features.two) == "GRanges"){
+              if(!is.null(names(features.two))){
+                feature.two.names = unique(names(features.two))
+                feature.two.names.full = names(features.two)
+              }else if(is.null(names(features.two)) & "id" %in% names(elementMetadata(features.two))){
+                feature.two.names = unique(features.two$id)
+                feature.two.names.full = features.two$id
+              }else{
+                stop("features.two missing names or an id column")    
+              }
+            }else{
+              stop("features.two must be GRanges object")
+            }
+            
+            x.gi  = subsetByFeatures(GIObject, features.one)
+            x.gi  = subsetByFeatures(x.gi, features.two)
+            
+            one.one.ol = findOverlaps(features.one, x.gi@anchor_one)
+            two.one.ol = findOverlaps(features.one, x.gi@anchor_two)
+            
+            f1.one.f2.two = subjectHits(one.one.ol)[
+              which(x.gi@anchor_one[ subjectHits(one.one.ol) ]$node.class == feature.name.one & 
+              x.gi@anchor_two[ subjectHits(one.one.ol) ]$node.class == feature.name.two)]
+            
+            f1.two.f2.one = subjectHits(two.one.ol)[
+              which(x.gi@anchor_two[ subjectHits(two.one.ol) ]$node.class == feature.name.one & 
+              x.gi@anchor_one[ subjectHits(two.one.ol) ]$node.class == feature.name.two)]
+            
+            results = NULL
+            # this now results in a GI object only contain feature.name.one:feature.name.two interactions
+            x.gi = x.gi[unique(c(f1.one.f2.two, f1.two.f2.one)),]
+            
+            one.one.ol = findOverlaps(features.one, x.gi@anchor_one)
+            two.one.ol = findOverlaps(features.one, x.gi@anchor_two)
+            
+            one.two.ol = findOverlaps(features.two, x.gi@anchor_one)
+            two.two.ol = findOverlaps(features.two, x.gi@anchor_two)
+            
+            one.indexes = queryHits(one.one.ol)[x.gi@anchor_one[ subjectHits(one.one.ol) ]$node.class == feature.name.one]  
+            two.indexes = queryHits(two.one.ol)[x.gi@anchor_two[ subjectHits(two.one.ol) ]$node.class == feature.name.one] 
+            features.one.with.interactions.indexes = unique(c(one.indexes, two.indexes))
+            
+            all.features.one.with.interactions = features.one[features.one.with.interactions.indexes]
+            feature.ones.id = feature.one.names.full[features.one.with.interactions.indexes]
+            for( fn in unique(feature.ones.id)){
+              #print(fn)
+              iss = which(feature.one.names.full ==fn)
+              
+              interactions = unique(c(subjectHits(one.one.ol[ queryHits(one.one.ol) %in% iss]), subjectHits(two.one.ol[ queryHits(two.one.ol) %in% iss])))
+              interactions.one = unique(subjectHits(one.one.ol[ queryHits(one.one.ol) %in% iss]))
+              interactions.two = unique(subjectHits(two.one.ol[ queryHits(two.one.ol) %in% iss]))
+              
+              features.two.involved.one = unique(unlist(elementMetadata(anchorOne(x.gi))[[paste(feature.name.two, "id", sep=".")]][interactions.two]))
+              features.two.involved.two = unique(unlist(elementMetadata(anchorTwo(x.gi))[[paste(feature.name.two, "id", sep=".")]][interactions.one]))
+              #print(unique(c(features.two.involved.one, features.two.involved.two)))
+              for( fn.two in unique(c(features.two.involved.one, features.two.involved.two))){
+                #print(feature.two)
+                iss.two = which(feature.two.names.full ==fn.two)
+                #print(iss.two)
+                indexes = unique(intersect(interactions, unique(c(subjectHits(one.two.ol[ queryHits(one.two.ol) %in% iss.two]), 
+                                                                  subjectHits(two.two.ol[ queryHits(two.two.ol) %in% iss.two])))))
+                counts = sum(x.gi@counts[indexes])
+                #print(counts)
+                results = rbind(results, c(fn, fn.two, counts))
+              }
+            }
+            results = data.frame(results[,1], results[,2], as.numeric(results[,3]))
+            colnames(results) = c(paste(capitalize(feature.name.one), "id", sep="."), 
+                                  paste(capitalize(feature.name.two), "id", sep="."), 
+                                  "counts")
+            return(results)
+})
+
+

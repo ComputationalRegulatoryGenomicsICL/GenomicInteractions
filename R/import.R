@@ -45,13 +45,15 @@ makeGenomicInteractionsFromFile = function(fn, type, experiment_name="", descrip
                                      fdr = as.numeric( dat[, "FDR"]))
     
       }else if(type == "chiapet.encode"){
-        dat = .processChiapetName(unique(import.bed(fn)$name))
+        #dat = .processChiapetName(unique(import.bed(fn)$name))
+        dat = read.table(fn, header=TRUE, stringsAsFactors=FALSE, sep="\t")
         anchor_one = GRanges(dat[,"chrom.left."],
                           IRanges(as.integer(dat[,"start.left."]), as.integer(dat[,"end.left."])))
         anchor_two = GRanges(dat[,"chrom.right."],
                           IRanges(as.integer(dat[,"start.right."]), as.integer(dat[,"end.right."])))
-        counts = as.integer(dat[,"counts"])
-    
+        counts = as.integer(dat[,"pet.cound.between.left.and.right.anchors"])
+        em <- DataFrame(p.value = as.numeric( dat[,"p.value"]), fdr=as.numeric( dat[, "q.value"]))
+        
       }else if(type == "bed12"){
         bedfile = import.bed(fn)
         dat = .processChiapetName(unique(bedfile$name))

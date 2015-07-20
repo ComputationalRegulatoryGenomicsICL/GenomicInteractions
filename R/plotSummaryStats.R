@@ -12,24 +12,24 @@
 #' @param other Default 5. Passed to plotInteractionAnnotations. Interaction types making up fewer than "other" percent of the total interactions will be consolidated into a single "other" category.
 #' @param cut Default 10. Passed to plotCounts.All interactions with counts > cut are consolidated into a single category.
 #' @return invisible(1)
-#' @importFrom gridExtra grid.arrange
+#' @importFrom gridExtra marrangeGrob
 #' @export
 #'
 #' @examples
 #' data(hic_example_data)
 #' plotSummaryStats(hic_example_data)
 plotSummaryStats <- function(GIObject, other=5, cut=10){
-  p1 <- ggplotGrob(plotCisTrans(GIObject))
-  p2 <- ggplotGrob(plotDists(GIObject))
-  p4 <- ggplotGrob(plotCounts(GIObject, cut=cut))
-
+  p1 <- plotCisTrans(GIObject)
+  p2 <- plotDists(GIObject)
+  p4 <- plotCounts(GIObject, cut=cut)
+  
   if ("node.class" %in% names(elementMetadata(GIObject@anchor_one))) {
-    p3 <- ggplotGrob(plotInteractionAnnotations(GIObject, other=other))
-    grid.arrange(p4,p2,p1,p3, ncol=2, nrow=2, main=name(GIObject))
+    p3 <- plotInteractionAnnotations(GIObject, other=other)
+    p <- marrangeGrob(list(p4,p2,p1,p3), ncol=2, nrow =2, top = name(GIObject))
   }else{
-    grid.arrange(p4,p2,p1, ncol=2, nrow=2, main=name(GIObject))
+    p <- marrangeGrob(list(p4,p2,p1), nrow = 2, ncol =2, top = name(GIObject))
   }
-  return(invisible(1))
+  return(p)
 }
 
 # Cis-trans %
@@ -110,7 +110,7 @@ plotDists <- function(GIObject, breaks=c(0, 1000, 5000, 10000, 50000, 100000, 50
     geom_histogram() +
     theme_bw(base_size=16)+
     theme(axis.text.x = element_text(angle=90, vjust=0.5)) +
-    xlab("Interaction distance (bp)")
+    xlab("Interaction distance (bp)") + ylab("Count")
 
   return(p)
 }
