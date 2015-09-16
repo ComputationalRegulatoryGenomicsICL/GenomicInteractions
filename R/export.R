@@ -3,14 +3,10 @@
 #' @param GIObject  A GenomicInteractions object.
 #' @param fn        A filename to write the object to
 #' @param score     Which metadata column to export as score
-#' @param drop.trans Logical indicating whether to drop trans interactions.
+#' @param drop.trans Logical indicating whether to allow dropping trans interactions (otherwise an error is produced)
 #'
 #' Exports a GenomicInteractions object to BED12 format, and writes to a specified file. If filename is not specified,
-#' then a data.frame containing the information is returned.
-#'
-#' Bed12 files provide a method for visualising interactions, it is not a good format for storing all of the data associated
-#' with an interaction dataset, particularly for trans-chromosomal interactions, which can only be stored in the bed12 names
-#' field.
+#' then a data.frame containing the information is returned. Please note some large datasets may take a long time to export.
 #'
 #' @return invisible(1) if outputting to file or a data.frame containing all of the corresponding information
 #' @export
@@ -23,70 +19,42 @@ setGeneric("export.bed12",function(GIObject, fn=NULL, score="counts", drop.trans
 setMethod("export.bed12", c("GenomicInteractions"),
         function(GIObject, fn=NULL, score="counts", drop.trans=c(FALSE, TRUE)){
 
-            GIObject = sort(GIObject, order.interactions=FALSE)
-
             is_trans = is.trans(GIObject)
-            cis = GIObject[!is_trans]
-            trans = GIObject[is_trans]
 
-            len = length(cis)
-            s1 = strand(anchorOne(cis))
-            s2 = strand(anchorTwo(cis))
+            if (any(is_trans)) {
+                if (drop.trans==FALSE) stop("trans interactions present in object and drop.trans == FALSE")
+            }
 
-            output_cis = data.frame(
-                chr=as.character(seqnames(anchorOne(cis))),
-                start=start(anchorOne(cis))-1,
-                end=end(anchorTwo(cis)),
-                name=.exportName(cis),
-                score=interactionCounts(cis),
-                strand=ifelse(s1 == s2 & s1 %in% c("+", "-"), s1, "."), # avoid case where strand == "*"
-                thickStart=start(anchorOne(cis))-1,
-                thickEnd=end(anchorTwo(cis)),
-                itemRgb=rep("255,0,0", len),
-                blockCount=2,
-                blockSizes=paste(as.character(width(anchorOne(cis))),
-                                 as.character(width(anchorTwo(cis))), sep=","),
-                                 blockStarts=paste(0, start(anchorTwo(cis)) - start(anchorOne(cis)), sep=","))
+            GIObject = sort(GIObject[!is_trans], order.interactions=FALSE)
 
-            output_trans = data.frame(
-                chr=c(as.character(seqnames(anchorOne(trans))),
-                      as.character(seqnames(anchorTwo(trans)))),
-                start=c(as.character(start(anchorOne(trans))),
-                        as.character(start(anchorTwo(trans)))),
-                end=c(as.character(end(anchorOne(trans))),
-                      as.character(end(anchorTwo(trans)))),
-                name=rep(.exportName(trans), 2),
-                score=rep(interactionCounts(trans), 2),
-                strand=c(as.character(strand(anchorOne(trans))),
-                         as.character(strand(anchorTwo(trans)))),
-                thickStart=c(as.character(start(anchorOne(trans))),
-                             as.character(start(anchorTwo(trans)))),
-                thickEnd=c(as.character(end(anchorOne(trans))),
-                           as.character(end(anchorTwo(trans)))),
-                itemRgb=rep("255,0,0", length(trans)),
-                blockCount=1,
-                blockSizes=c(as.character(width(anchorOne(trans))), as.character(width(anchorTwo(trans)))),
-                blockStarts=0)
+            lx = length(GIObject)
+            names = .getNames(GIObject)
+            score = .getScore(GIObject, score)
+            s1 = strand(anchorOne(GIObject))
+            s2 = strand(anchorTwo(GIObject))
 
-            if (!is.null(fn)) {
-                write.table(output_cis, fn, sep="\t", col.names=FALSE, quote=FALSE, row.names=FALSE )
-                write.table(output_trans, fn, sep="\t", col.names=FALSE, quote=FALSE, row.names=FALSE, append=TRUE)
-                return(invisible(1))
-			} else {
-                return(rbind(output_cis, output_trans))
+            output = data.frame(chr=as.character(seqnames(anchorOne(GIObject))),
+                                start=start(anchorOne(GIObject))-1,
+                                end=end(anchorTwo(GIObject)),
+                                name=names,
+                                score=score,
+                                strand=ifelse(s1 == s2 & s1 %in% c("+", "-"), s1, "."), # avoid case where strand == "*"
+                                thickStart=start(anchorOne(GIObject))-1,
+                                thickEnd=end(anchorTwo(GIObject)),
+                                itemRgb=rep("255,0,0", lx),
+                                blockCount=2,
+                                blockSizes=paste(as.character(width(anchorOne(GIObject))), as.character(width(anchorTwo(GIObject))), sep=","),
+                                blockStarts=paste(0, start(anchorTwo(GIObject)) - start(anchorOne(GIObject)), sep=","),
+                                stringsAsFactors=FALSE)
+
+            if(!is.null(fn)){
+			    write.table(output, fn, sep="\t", col.names=FALSE, quote=FALSE, row.names=FALSE )
+			}else{
+			    return(output)
 			}
-})
 
-.exportName = function(gi) {
-    paste0(
-        seqnames(anchorOne(gi)), ":",
-        start(anchorOne(gi)) - 1 , "..",
-        end(anchorOne(gi)), "-",
-        seqnames(anchorTwo(gi)), ":",
-        start(anchorTwo(gi)) - 1, "..",
-        end(anchorTwo(gi)), ",",
-        interactionCounts(gi))
-}
+			return(invisible(1))
+})
 
 #' Export interactions in BED Paired-End format.
 #'

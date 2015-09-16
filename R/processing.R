@@ -1,3 +1,4 @@
+
 #' Summarise Interactions between defined anchors
 #'
 #' Calculate the number of of paired-end reads mapping between a defined set of anchors.
@@ -100,7 +101,7 @@ sameStrand <- function(GIObject){
 #' @param plot TRUE by default. Whether to plot the log2ratio of opposite
 #' to same strand reads vs distance.
 #'
-#' @importFrom dplyr mutate_ group_by_ n summarise_ 
+#' @importFrom dplyr mutate group_by n summarise filter select "%>%"
 #' @import ggplot2
 #' @export
 #' @return The cutoff in base pairs below which an interaction is likely to be a self ligation.
@@ -118,28 +119,33 @@ get_self_ligation_threshold <- function(GIObject, bins=100, distance_th=400000, 
     breaks <- stranded_cis_df$Distance[cuts]
 
     stranded_cis_df$Bin <- as.numeric(as.character(cut(stranded_cis_df$Distance, breaks=c(0,breaks), labels=c(0, breaks[1:length(breaks)-1]), include.lowest = TRUE)))
-    byBin <- group_by_(stranded_cis_df, "Bin")
+    byBin <- group_by(stranded_cis_df, Bin)
 
     #summarise by bin
-    sum_byBin <- summarise_(byBin, Total=quote(n()), SameStrand=quote(sum(SameStrand)))
-    sum_byBin <- mutate_(sum_byBin, OppStrand=quote(Total-SameStrand),
-                        log2Ratio=quote(log2((OppStrand+1)/(SameStrand+1)))) #pseudocount to avoid NaN errors
-    sum_byBin <- mutate_(sum_byBin, OppPercent=quote(100*OppStrand/Total), 
-                        SamePercent=quote(100*SameStrand/Total))
+    sum_byBin <- summarise(byBin, Total=n(), SameStrand=sum(SameStrand))
+    sum_byBin <- mutate(sum_byBin, OppStrand=Total-SameStrand,
+                        log2Ratio=log2((OppStrand+1)/(SameStrand+1))) #pseudocount to avoid NaN errors
+    sum_byBin <- mutate(sum_byBin, OppPercent=100*OppStrand/Total, SamePercent=100*SameStrand/Total)
 
     #get cutoff of log2ratio
-    
-    longrange_mean_log2 <- mean(sum_byBin$log2Ratio[sum_byBin$Bin > distance_th])
+    sum_byBin %>%
+        filter(Bin > distance_th) %>%
+        select(log2Ratio) %>%
+        unlist() %>%
+        mean() -> longrange_mean_log2
 
-    longrange_sd_log2 <- sd(sum_byBin$log2Ratio[sum_byBin$Bin > distance_th])
+    sum_byBin %>%
+        filter(Bin > distance_th) %>%
+        select(log2Ratio) %>%
+        unlist() %>%
+        sd() -> longrange_sd_log2
 
     lower <- longrange_mean_log2 - 2*longrange_sd_log2
     upper <- longrange_mean_log2 + 2*longrange_sd_log2
     bp_cutoff <- min(sum_byBin[sum_byBin$log2Ratio > lower & sum_byBin$log2Ratio < upper,"Bin"])
 
     if (plot){
-        print(ggplot(sum_byBin, aes_string(x="Bin", y="log2Ratio")) + 
-                geom_line() + geom_point() +
+        print(ggplot(sum_byBin, aes(x=Bin, y=log2Ratio)) + geom_line() + geom_point() +
                   geom_hline(aes_string(yintercept=lower)) +
                   geom_hline(aes_string(yintercept=upper)) +
                   coord_cartesian(xlim=c(0, 20000)) + geom_vline(xintercept=bp_cutoff, linetype="dashed") +
@@ -185,8 +191,8 @@ get_binom_ligation_threshold = function(GIObject, max.distance=20000, bin.size=5
     #bin data
     bins = cut(stranded_cis_df$Distance, breaks=seq(0, max.distance, by=bin.size), include.lowest=TRUE)
     stranded_cis_df$Bin = bins
-    byBin <- group_by_(stranded_cis_df, "Bin")
-    sum_byBin <- summarise_(byBin, Total=quote(n()), SameStrand=quote(sum(SameStrand)))
+    byBin <- group_by(stranded_cis_df, Bin)
+    sum_byBin <- summarise(byBin, Total=n(), SameStrand=sum(SameStrand))
 
     #get and adjust p values
     sum_byBin$p.value <- sapply(1:nrow(sum_byBin), function(x){binom.test(sum_byBin$SameStrand[x], sum_byBin$Total[x])$p.value})
@@ -200,17 +206,17 @@ get_binom_ligation_threshold = function(GIObject, max.distance=20000, bin.size=5
 
     if (plot){
         #data for plotting
-        sum_byBin <- mutate_(sum_byBin, OppStrand=quote(Total-SameStrand),
-                            OppPercent=quote(100*OppStrand/Total))
-        sum_byBin$Bin<- bin.size*as.numeric((sum_byBin$Bin))
+        sum_byBin <- mutate(sum_byBin, OppStrand=Total-SameStrand,
+                            Bin=bin.size*as.numeric((Bin)),
+                            OppPercent=100*OppStrand/Total)
 
         #plot % opposite strand reads and cutoff
-        print(ggplot(sum_byBin, aes_string(x="Bin", y="OppPercent")) + geom_line() + geom_point() +
+        print(ggplot(sum_byBin, aes(x=Bin, y=OppPercent)) + geom_line() + geom_point() +
                   coord_cartesian(xlim=c(0, max.distance)) + geom_vline(xintercept=bp_cutoff, linetype="dashed") +
                   ylab("Opposite Strand Percentage")
         )
         #plot p values, p value cutoff and distance cutoff
-        print(ggplot(sum_byBin, aes_string(x="Bin", y="p.value")) + geom_line() + geom_point() +
+        print(ggplot(sum_byBin, aes(x=Bin, y=p.value)) + geom_line() + geom_point() +
                   coord_cartesian(xlim=c(0, max.distance)) + geom_hline(xintercept=p.cutoff, linetype="dashed") +
                   geom_vline(xintercept=bp_cutoff, linetype="dashed") +
                   ylab("p value") + xlab("Distance (bp)")
@@ -219,3 +225,5 @@ get_binom_ligation_threshold = function(GIObject, max.distance=20000, bin.size=5
     #return distance cutoff
     return(bp_cutoff)
 }
+
+

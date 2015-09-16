@@ -48,8 +48,7 @@ The `GenomicInteractions` object consists of two linked `GenomicRanges` objects 
 ```{r}
 hic_data
 mcols(hic_data)
-head(hic_data$LogP)
-hic_data$p.value <- exp(hic_data$LogP)
+head(hic_data$fdr)
 ```
 
 We can check that the anchors are of the expected size (100kb).
@@ -66,12 +65,10 @@ head(interactionCounts(hic_data))
 mean(interactionCounts(hic_data))
 ```
 
-However, since we have FDRs and p-values, it is probably more informative to use these to find interactions of interest. Note that the FDR column in the dataset will be named differently depending on the number of interactions in your data. For simplicity in this document we will rename it!
+However, since we have FDRs and p-values, it is probably more informative to use these to find interactions of interest.
 
 ```{r}
 plot(density(hic_data$p.value))
-
-hic_data$fdr <- hic_data$FDR.Benjamini..based.on.3.68e.08.total.tests.
 plot(density(hic_data$fdr))
 ```
 

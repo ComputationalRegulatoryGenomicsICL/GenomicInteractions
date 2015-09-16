@@ -223,13 +223,14 @@ setMethod("countOverlaps", c("GRanges", "GenomicInteractions"),
 setMethod("overlapsAny", c("GenomicInteractions", "GRanges"), 
           function(query, subject,  maxgap = 0L, minoverlap = 1L,
                   type = c("any", "start", "end", "within", "equal"),
+                  select = c("all", "first", "last", "arbitrary"),
                   ignore.strand=FALSE){
     return(list(one=overlapsAny(anchorOne(query), subject,
                                 maxgap=maxgap, minoverlap=minoverlap, type=type, 
-                                ignore.strand = ignore.strand),
+                                select=select, ignore.strand = ignore.strand),
                 two=overlapsAny(anchorTwo(query), subject, 
                                 maxgap=maxgap, minoverlap=minoverlap, type=type, 
-                                ignore.strand = ignore.strand)
+                                select=select, ignore.strand = ignore.strand)
                 ))
 })
 
@@ -238,13 +239,14 @@ setMethod("overlapsAny", c("GenomicInteractions", "GRanges"),
 setMethod("overlapsAny", c("GRanges", "GenomicInteractions"), 
           function(query, subject, maxgap = 0L, minoverlap = 1L,
                   type = c("any", "start", "end", "within", "equal"),
+                  select = c("all", "first", "last", "arbitrary"),
                   ignore.strand=FALSE){
   return(list(one=overlapsAny(query, anchorOne(subject), 
                               maxgap=maxgap, minoverlap=minoverlap, type=type, 
-                              ignore.strand = ignore.strand),
+                              select=select, ignore.strand = ignore.strand),
               two=overlapsAny(query, anchorTwo(subject), 
                               maxgap=maxgap, minoverlap=minoverlap, type=type, 
-                              ignore.strand = ignore.strand)
+                              select=select, ignore.strand = ignore.strand)
               ))
 })
 
