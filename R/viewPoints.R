@@ -67,14 +67,14 @@ viewPoint = function(x, bait, region=NULL, ...) {
 #' that is being plotted.
 #' @param ... additional arguments to plot
 #' 
-#' @return output of plot()
+#' @return Coverage that is plotted (invisibly)
 #'
 #' @import GenomicRanges
 #' @export
 plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
     if (length(region) > 1) stop("region must be a single range")
     x = x[overlapsAny(x@anchor_two, region, type="within")]
-    cov = as(coverage(x@anchor_two)[region], "GRanges")
+    cov = as(coverage(x@anchor_two, weight = interactionCounts(x))[region], "GRanges")
     points_x = c(start(cov), end(cov)) + start(region)
     points_y = rep.int(cov$score, 2)
     ord = order(points_x)
@@ -83,8 +83,58 @@ plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
     xlab <- as.character(seqnames(region))
     }
     
-    p = plot(points_x[ord], points_y[ord], t="l", 
+    plot(points_x[ord], points_y[ord], t="l", 
              ylab = ylab, xlab = xlab, ...)
-    return(p)
+    
+    return(invisible(coverage(cov, weight = "score")))
 }
 
+#' Plot coverage around a set of virtual 4C viewpoints
+#' 
+#' Plots summarised coverage of interactions around a set of viewpoints, 
+#' e.g. promoters. This function requires the output of `viewPoint()` as input. 
+#'
+#' @param x A GenomicInteractions object which is output from viewPoint
+#' @param left_dist Distance 'left' of interactions to consider, in bp.
+#' @param right_dist Distance 'right' of interactions to consider, in bp.
+#' @param fix One of "center", "start", "end". Passed to `resize`. Interaction 
+#' distances are calculated relative to this part of the bait. 
+#' @param ylab Y axis label.
+#' @param xlab X axis label. 
+#' @param ... additional arguments to plot
+#' 
+#' @return  Coverage that is plotted (invisibly)
+#'
+#' @import GenomicRanges
+#' @export
+plotAvgViewpoint = function(x, left_dist = 100000, right_dist = 100000, ylab="Average signal", 
+                            xlab="Relative position", fix = "center",...) {
+  
+  cov <- .makeRelativeVP(x, fix = fix, left_dist = left_dist, right_dist = right_dist )
+  
+  points_x = c(start(cov), end(cov)) - left_dist
+  points_y = rep.int(runValue(cov), 2)
+  ord = order(points_x)
+  
+  p = plot(points_x[ord], points_y[ord], t="l", 
+           ylab = ylab, xlab = xlab, ...)
+  
+  return(invisible(cov))
+}
+
+.makeRelativeVP <- function(GIObject, fix = "center", left_dist = 100000, right_dist = 100000){
+  #make ranges relative to bait
+  bait <- resize(anchorOne(GIObject), width = 1, fix = fix)
+  ints <- ranges(anchorTwo(GIObject))
+  ints <- shift(ints, shift = -(start(bait)))
+  ints <- shift(ints, shift = left_dist)
+  
+  #make coverage and adjust to mean coverage per bait
+  cov <- coverage(ints, weight = interactionCounts(GIObject), 
+                  width = right_dist+left_dist)
+  cov <- cov / length(unique(bait))
+  
+  return(cov)
+  #get points to plot
+  
+}

@@ -145,7 +145,7 @@ setMethod(".calculateDistances.df", c("data.frame", "data.frame"),
                 distances = ifelse(object1$seqnames==object2$seqnames,
                                 ifelse(object2$start > object1$start, 
                                     object2$end - object1$start -1 ,
-                                    object1$end) - object2$start -1, NA)
+                                    object1$end - object2$start -1), NA)
             }else if(method=="inner"){ 
                 distances = ifelse(object1$seqnames==object2$seqnames,
                                 ifelse(object2$start > object1$start, 
@@ -191,6 +191,7 @@ setMethod(".calculateDistances.df", c("data.frame", "data.frame"),
 #' 
 #' @examples
 #' 
+#' library("GenomicRanges")
 #' data(hic_example_data)
 #' data(mm9_refseq_promoters)
 #' mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)

@@ -19,7 +19,7 @@ that is being plotted.}
 \item{...}{additional arguments to plot}
 }
 \value{
-output of plot()
+Coverage that is plotted (invisibly)
 }
 \description{
 Plots coverage of interactions around a given viewpoint. This function requires
