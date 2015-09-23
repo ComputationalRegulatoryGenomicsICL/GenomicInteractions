@@ -88,3 +88,22 @@ plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
     return(p)
 }
 
+<<<<<<< HEAD
+=======
+.makeRelativeVP <- function(GIObject, fix = "center", left_dist = 100000, right_dist = 100000){
+  #make ranges relative to bait
+  bait <- resize(anchorOne(GIObject), width = 1, fix = fix)
+  ints <- ranges(anchorTwo(GIObject))
+  ints <- GenomicRanges::shift(ints, shift = -(start(bait)))
+  ints <- GenomicRanges::shift(ints, shift = left_dist)
+  
+  #make coverage and adjust to mean coverage per bait
+  cov <- coverage(ints, weight = interactionCounts(GIObject), 
+                  width = right_dist+left_dist)
+  cov <- cov / length(unique(bait))
+  
+  return(cov)
+  #get points to plot
+  
+}
+>>>>>>> 477b5bf366e92c05b92f97207cd458c5054f6aed

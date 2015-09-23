@@ -78,10 +78,10 @@ test_that("No overlaps returns list of empty matches (gr, gi)", {
 test_that("No / one anchor overlaps returns list of empty matches (gi, gi)", {
   gi1 <- make_gi()
   gi2 <- gi1  
-  gi2@anchor_one <- shift(anchorOne(gi2), 1000L)
-  gi2@anchor_two <- shift(anchorTwo(gi2), 1000L)
+  gi2@anchor_one <- GenomicRanges::shift(anchorOne(gi2), 1000L)
+  gi2@anchor_two <- GenomicRanges::shift(anchorTwo(gi2), 1000L)
   gi3 <- gi1
-  gi3@anchor_two <- shift(anchorTwo(gi3), 1000L)
+  gi3@anchor_two <- GenomicRanges::shift(anchorTwo(gi3), 1000L)
   
   expect <- new("Hits", queryHits = integer(0), subjectHits = integer(0),
                            queryLength = 10L, subjectLength = 10L)
