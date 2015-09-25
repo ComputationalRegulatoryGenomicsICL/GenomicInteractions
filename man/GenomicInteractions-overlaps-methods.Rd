@@ -34,13 +34,11 @@
 
 \S4method{overlapsAny}{GenomicInteractions,GRanges}(query, subject,
   maxgap = 0L, minoverlap = 1L, type = c("any", "start", "end", "within",
-  "equal"), select = c("all", "first", "last", "arbitrary"),
-  ignore.strand = FALSE)
+  "equal"), ignore.strand = FALSE)
 
 \S4method{overlapsAny}{GRanges,GenomicInteractions}(query, subject,
   maxgap = 0L, minoverlap = 1L, type = c("any", "start", "end", "within",
-  "equal"), select = c("all", "first", "last", "arbitrary"),
-  ignore.strand = FALSE)
+  "equal"), ignore.strand = FALSE)
 
 \S4method{findOverlaps}{GenomicInteractions,GenomicInteractions}(query, subject)
 }

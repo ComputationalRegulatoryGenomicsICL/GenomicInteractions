@@ -59,10 +59,12 @@ plotCisTrans <- function(GIObject){
   dat$ymax = cumsum(dat$fraction)
   dat$ymin = c(0, head(dat$ymax, n=-1))
   dat$label <- paste(dat$category, "\n", signif(100*dat$fraction,3), "%")
-
-  p <- ggplot(dat, aes(fill=category, ymax=ymax, ymin=ymin, xmax=4, xmin=2.3, label=label)) +
+  dat$labelpos <- (dat$ymax+dat$ymin)/2
+  
+  p <- ggplot(dat, aes_string(fill="category", ymax="ymax", ymin="ymin", 
+                              xmax=4, xmin=2.3, label="label")) +
     geom_rect() +
-    geom_text(aes(x=(4+2.3)/2, y=(ymax+ymin)/2)) +
+    geom_text(aes_string(x=(4+2.3)/2, y="labelpos")) +
     coord_polar(theta="y") +
     xlim(c(0, 4))+
     theme_bw(base_size=16) +
@@ -106,7 +108,7 @@ plotDists <- function(GIObject, breaks=c(0, 1000, 5000, 10000, 50000, 100000, 50
   labs[length(breaks)-1] <- paste(">", breaks[length(breaks)-1])
 
   dists_df <- data.frame(dists, Distance=cut(dists, breaks, labels=labs))
-  p <- ggplot(dists_df, aes(x=Distance)) +
+  p <- ggplot(dists_df, aes_string(x="Distance")) +
     geom_histogram() +
     theme_bw(base_size=16)+
     theme(axis.text.x = element_text(angle=90, vjust=0.5)) +
@@ -151,7 +153,7 @@ plotInteractionAnnotations <- function(GIObject, node.classes=NULL, viewpoints=N
   if (other > 0) {
     count.other = sum(dat$count[dat$fraction < other/100])
     fraction.other = sum(dat$fraction[dat$fraction < other/100])
-    dat = subset(dat, fraction > other/100)
+    dat = dat[(dat$fraction > other/100),]
     rownames(dat) = 1:nrow(dat)
     other.row = data.frame("other", count.other, fraction.other)
     colnames(other.row) = colnames(dat)
@@ -162,8 +164,11 @@ plotInteractionAnnotations <- function(GIObject, node.classes=NULL, viewpoints=N
   dat$ymin = c(0, head(dat$ymax, n=-1))
   dat$label <- paste(dat$category, "\n", signif(100*dat$fraction,3), "%")
   dat[dat$fraction < 0.03, "label"] <- NA
-
-  p <- ggplot(dat, aes(fill=category, ymax=ymax, ymin=ymin, xmax=4, xmin=2.3)) +
+  dat$labelpos <- (dat$ymax+dat$ymin)/2
+  dat$fraclabel <- paste(signif(100*dat$fraction,3), "%")
+  
+  p <- ggplot(dat, aes_string(fill="category", ymax="ymax", ymin="ymin", 
+                              xmax=4, xmin=2.3)) +
     geom_rect() +
     coord_polar(theta="y") +
     xlim(c(0, 4)) +
@@ -177,9 +182,10 @@ plotInteractionAnnotations <- function(GIObject, node.classes=NULL, viewpoints=N
     ggtitle("Interaction Classes")
 
   if (!legend){
-    p <- p + geom_text(aes(x=(4+2.3)/2, y=((ymax+ymin)/2), label=label))+theme(legend.position="none")
+    p <- p + geom_text(aes_string(x=(4+2.3)/2, y="labelpos", label="label")) + 
+      theme(legend.position="none")
   }else{
-    p <- p + geom_text(aes(x=(4+2.3)/2, y=((ymax+ymin)/2), label=paste(signif(100*fraction,3), "%")))
+    p <- p + geom_text(aes_string(x=(4+2.3)/2, y="labelpos", label="fraclabel"))
   }
 
   return(p)
@@ -257,7 +263,7 @@ plotCounts <- function(GIObject, normalise=FALSE, cut = 10){
     dat$Var1 <- factor(dat$Var1, levels=c(as.numeric(dat$Var1)))
   }
 
-  p <- ggplot(dat, aes(x=Var1, y=Freq)) +
+  p <- ggplot(dat, aes_string(x="Var1", y="Freq")) +
     geom_bar(stat="identity", position="dodge") +
     xlab("Number of reads") +
     ylab(ylabel) +

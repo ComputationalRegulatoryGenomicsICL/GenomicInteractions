@@ -34,10 +34,10 @@ case of a GRangesList or from either the names of a the provided GRanges or an i
 in its associated metadata.
 }
 \examples{
-library(GenomicRanges)
+library("GenomicRanges")
 data(hic_example_data)
 data(mm9_refseq_promoters)
-mm9_refseq_grl = GenomicRanges::split(mm9_refseq_promoters, mm9_refseq_promoters$id)
+mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)
 annotateInteractions(hic_example_data, list(promoter=mm9_refseq_grl))
 }
 
