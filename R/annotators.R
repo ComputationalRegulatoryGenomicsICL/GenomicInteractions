@@ -191,9 +191,10 @@ setMethod(".calculateDistances.df", c("data.frame", "data.frame"),
 #' 
 #' @examples
 #' 
+#' library(GenomicRanges)
 #' data(hic_example_data)
 #' data(mm9_refseq_promoters)
-#' mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)
+#' mm9_refseq_grl = GenomicRanges::split(mm9_refseq_promoters, mm9_refseq_promoters$id)
 #' annotateInteractions(hic_example_data, list(promoter=mm9_refseq_grl))
 setGeneric("annotateInteractions",function(GIObject, annotations){standardGeneric ("annotateInteractions")})
 #' @rdname annotateInteractions
