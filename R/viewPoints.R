@@ -88,8 +88,6 @@ plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
     return(p)
 }
 
-<<<<<<< HEAD
-=======
 .makeRelativeVP <- function(GIObject, fix = "center", left_dist = 100000, right_dist = 100000){
   #make ranges relative to bait
   bait <- resize(anchorOne(GIObject), width = 1, fix = fix)
@@ -106,4 +104,3 @@ plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
   #get points to plot
   
 }
->>>>>>> 477b5bf366e92c05b92f97207cd458c5054f6aed
