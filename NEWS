@@ -1,3 +1,22 @@
+CHANGES IN VERSION 1.3.9
+-------------------------
+
+NEW FEATURES
+* InteractionTrack class for plotting interactions with Gviz
+* plotAvgViewpoint for plotting summarised interactions around a set of features
+* summariseByFeaturePairs: to summarise interactions between all pairs of two feature sets
+
+SIGNIFICANT USER-LEVEL CHANGES
+* annotateInteractions is significantly faster
+* Data import has been made stricter and more consistent across different file formats. 
+  Homer interaction files now have data imported that was previously discarded. 
+
+BUG FIXES
+* single viewpoint plotting (plotViewpoint)
+* is.dt, is.pt
+* calculateDistances
+* some import/export issues
+
 CHANGES IN VERSION 1.1.0
 -------------------------
 
