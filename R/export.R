@@ -39,7 +39,7 @@ setMethod("export.bed12", c("GenomicInteractions"),
                 end=end(anchorTwo(cis)),
                 name=.exportName(cis),
                 score=interactionCounts(cis),
-                strand=ifelse(s1 == s2 & s1 %in% c("+", "-"), s1, "."), # avoid case where strand == "*"
+                strand=ifelse(s1 == s2 & s1 %in% c("+", "-"), as.vector(s1), as.vector(".")), # avoid case where strand == "*"
                 thickStart=start(anchorOne(cis))-1,
                 thickEnd=end(anchorTwo(cis)),
                 itemRgb=rep("255,0,0", len),
