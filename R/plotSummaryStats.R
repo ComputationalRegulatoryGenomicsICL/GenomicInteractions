@@ -109,7 +109,7 @@ plotDists <- function(GIObject, breaks=c(0, 1000, 5000, 10000, 50000, 100000, 50
 
   dists_df <- data.frame(dists, Distance=cut(dists, breaks, labels=labs))
   p <- ggplot(dists_df, aes_string(x="Distance")) +
-    geom_histogram() +
+    geom_bar() +
     theme_bw(base_size=16)+
     theme(axis.text.x = element_text(angle=90, vjust=0.5)) +
     xlab("Interaction distance (bp)") + ylab("Count")
