@@ -25,7 +25,7 @@
 #' 
 #' @return A GenomicInteractions object.
 #' 
-#' @import GenomicRanges
+#' @import IRanges GenomicRanges
 #' @export
 #' @examples
 #' \dontrun{
@@ -69,7 +69,7 @@ viewPoint = function(x, bait, region=NULL, ...) {
 #' 
 #' @return Coverage that is plotted (invisibly)
 #'
-#' @import GenomicRanges
+#' @import IRanges GenomicRanges
 #' @export
 plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
     if (length(region) > 1) stop("region must be a single range")

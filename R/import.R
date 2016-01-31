@@ -19,7 +19,7 @@
 #' @return a GenomicInteractions object
 #'
 #' @importFrom Rsamtools scanBamFlag ScanBamParam scanBam bamFlagAsBitMatrix
-#' @importFrom IRanges IRanges
+#' @import IRanges GenomicRanges
 #' @importFrom data.table data.table fread .N
 #' @importFrom stringr str_split
 #'

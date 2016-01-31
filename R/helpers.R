@@ -219,6 +219,7 @@ setMethod("countOverlaps", c("GRanges", "GenomicInteractions"),
 })
 
 #' @rdname GenomicInteractions-overlaps-methods
+#' @import IRanges GenomicRanges
 #' @export
 setMethod("overlapsAny", c("GenomicInteractions", "GRanges"), 
           function(query, subject,  maxgap = 0L, minoverlap = 1L,
@@ -234,6 +235,7 @@ setMethod("overlapsAny", c("GenomicInteractions", "GRanges"),
 })
 
 #' @rdname GenomicInteractions-overlaps-methods
+#' @import IRanges GenomicRanges
 #' @export
 setMethod("overlapsAny", c("GRanges", "GenomicInteractions"), 
           function(query, subject, maxgap = 0L, minoverlap = 1L,
@@ -249,6 +251,7 @@ setMethod("overlapsAny", c("GRanges", "GenomicInteractions"),
 })
 
 #' @rdname GenomicInteractions-overlaps-methods
+#' @import IRanges GenomicRanges
 #' @export
 setMethod("findOverlaps", c("GenomicInteractions", "GenomicInteractions"), function(query, subject) {
     if (!all(.isSorted(query)) & !all(.isSorted(subject)))
@@ -367,7 +370,7 @@ setMethod("sort", "GenomicInteractions", function(x, decreasing=FALSE, order.int
 #' @param minAnchorSize The minimum size anchor to allow when trimming ranges.
 #' @param ... any additional arguments to trim
 #' @return A trimmed GenomicInteractions object
-#' @importFrom IRanges trim
+#' @import IRanges GenomicRanges
 #' @docType methods
 #' @export
 setMethod("trim", "GenomicInteractions", function(x, minAnchorSize=1, ...) {
