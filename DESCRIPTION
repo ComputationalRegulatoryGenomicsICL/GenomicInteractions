@@ -23,7 +23,11 @@ Imports:
     igraph,
     S4Vectors,
     dplyr,
-    Gviz
+    Gviz,
+    Biobase,
+    graphics,
+    stats,
+    utils
 Suggests:
     knitr,
     BiocStyle,
@@ -35,4 +39,6 @@ Description: R package for handling Genomic interaction data, such as
 biocViews: Software,Infrastructure,DataImport,DataRepresentation,HiC
 License: GPL-3
 Depends:
-    R (>= 2.10)
+    R (>= 3.3),
+    InteractionSet
+RoxygenNote: 5.0.1

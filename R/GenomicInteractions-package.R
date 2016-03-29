@@ -3,4 +3,8 @@
 #'  @name GenomicInteractions-package
 #'  @docType package
 #'  @import methods
-NA
+#'  @examples 
+#'  library(GenomicInteractions)
+#'  GenomicInteractions()
+#'  
+"_PACKAGE"

@@ -1,17 +1,18 @@
-# Code to plot a set of summary statistics for a GenomicInteractions dataset
+# Code to plot a set of summary statistics for a GInteractions dataset
 
 # Wrapper to plot all...
-#' Plot summary statistics for a GenomicInteractions object
+#' Plot summary statistics for a GInteractions object
 #'
 #' Makes summary plots of the counts, interaction distances, interaction
 #' annotations, and percentage of cis and trans interactions for a
-#' GenomicInteractions object using `plotCounts`, `plotDists`, `plotCisTrans`,
+#' GInteractions object using `plotCounts`, `plotDists`, `plotCisTrans`,
 #' and `plotInteractionAnnotations`.
 #'
-#' @param GIObject A GenomicInteractions object
+#' @param GIObject A GInteractions object
 #' @param other Default 5. Passed to plotInteractionAnnotations. Interaction types making up fewer than "other" percent of the total interactions will be consolidated into a single "other" category.
 #' @param cut Default 10. Passed to plotCounts.All interactions with counts > cut are consolidated into a single category.
 #' @return invisible(1)
+#' @import ggplot2
 #' @importFrom gridExtra marrangeGrob
 #' @export
 #'
@@ -21,24 +22,31 @@
 plotSummaryStats <- function(GIObject, other=5, cut=10){
   p1 <- plotCisTrans(GIObject)
   p2 <- plotDists(GIObject)
-  p4 <- plotCounts(GIObject, cut=cut)
   
-  if ("node.class" %in% names(elementMetadata(GIObject@anchor_one))) {
-    p3 <- plotInteractionAnnotations(GIObject, other=other)
-    p <- marrangeGrob(list(p4,p2,p1,p3), ncol=2, nrow =2, top = name(GIObject))
-  }else{
-    p <- marrangeGrob(list(p4,p2,p1), nrow = 2, ncol =2, top = name(GIObject))
+  if(!is.null(interactionCounts(GIObject))){
+    p4 <- plotCounts(GIObject, cut=cut)
+  } else {
+    p4 <- NULL
   }
+  
+  if ("node.class" %in% names(elementMetadata(GIObject@regions))) {
+    p3 <- plotInteractionAnnotations(GIObject, other=other)
+  }else{
+    p3 <- NULL
+  }
+  
+  p_list <- list(p4, p2, p1, p3)
+  p_list <- p_list[lengths(p_list)>0]
+  p <- marrangeGrob(p_list, ncol=2, nrow =2, top = name(GIObject))
   return(p)
 }
 
 # Cis-trans %
 
-#' Plots the percentages of cis and trans interactions for a GenomicInteractions object as a donut plot.
+#' Plots the percentages of cis and trans interactions for a GInteractions object as a donut plot.
 #'
-#' @param GIObject A GenomicInteractions object
+#' @param GIObject A GInteractions object
 #' @return A ggplot2 plot
-#' @import ggplot2
 #' @export
 #'
 #' @examples
@@ -81,13 +89,12 @@ plotCisTrans <- function(GIObject){
 }
 
 # Distance of cis interactions
-#' Plots a histogram of interaction distances for a GenomicInteractions Object
+#' Plots a histogram of interaction distances for a GInteractions Object
 #'
-#' @param GIObject A GenomicInteractions object
+#' @param GIObject A GInteractions object
 #' @param breaks A numeric vector of breaks for the histogram
 #' @param method Method used for distance between anchors. Passed to calculateDistances. One of "midpoint", "inner", or "outer".
 #' @return A ggplot2 plot
-#' @import ggplot2
 #' @export
 #'
 #' @examples
@@ -99,7 +106,7 @@ plotDists <- function(GIObject, breaks=c(0, 1000, 5000, 10000, 50000, 100000, 50
   dists <- calculateDistances(GIObject, method=method)
   dists <- dists[!is.na(dists)]
 
-  breaks <- c(breaks, max(dists))
+  breaks <- unique(sort(c(breaks, max(dists))))
 
   labs <- vector()
   for(i in 1:length(breaks)-2){
@@ -117,9 +124,9 @@ plotDists <- function(GIObject, breaks=c(0, 1000, 5000, 10000, 50000, 100000, 50
   return(p)
 }
 
-#' Plot a donut plot of interaction types for an annotated GenomicInteractions object
+#' Plot a donut plot of interaction types for an annotated GInteractions object
 #'
-#' @param GIObject A GenomicInteractions object
+#' @param GIObject A GInteractions object
 #' @param node.classes Optional. All node.classes to include in the analysis.
 #' Default: all node classes.
 #' @param viewpoints Optional. If set will only consider interactions where at
@@ -133,14 +140,17 @@ plotDists <- function(GIObject, breaks=c(0, 1000, 5000, 10000, 50000, 100000, 50
 #'
 #' @return A ggplot2 plot
 #'
-#' @import ggplot2
 #' @export
 #'
 #' @examples
+#' library("GenomicRanges")
 #' data(hic_example_data)
+#' data(mm9_refseq_promoters)
+#' mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)
+#' annotateInteractions(hic_example_data, list(promoter=mm9_refseq_grl))
 #' plotInteractionAnnotations(hic_example_data)
 plotInteractionAnnotations <- function(GIObject, node.classes=NULL, viewpoints=NULL, other=0, keep.order=FALSE, legend=FALSE){
-
+  #add check for node classes existing!!
   dat <- categoriseInteractions(GIObject, node.classes, viewpoints)
 
   dat$fraction = dat$count / sum(dat$count)
@@ -193,7 +203,7 @@ plotInteractionAnnotations <- function(GIObject, node.classes=NULL, viewpoints=N
 
 #' Get the numbers of interaction types existing in your data
 #'
-#' @param GIObject A GenomicInteractions object
+#' @param GIObject A GInteractions object
 #' @param node.classes Optional. All node.classes to include in the analysis.
 #' Default: all node classes.
 #' @param viewpoints Optional. If set will only consider interactions where at
@@ -203,11 +213,19 @@ plotInteractionAnnotations <- function(GIObject, node.classes=NULL, viewpoints=N
 #' @export
 #'
 #' @examples
+#' library("GenomicRanges")
 #' data(hic_example_data)
+#' data(mm9_refseq_promoters)
+#' mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)
+#' annotateInteractions(hic_example_data, list(promoter=mm9_refseq_grl))
 #' categoriseInteractions(hic_example_data)
 categoriseInteractions <- function(GIObject, node.classes=NULL, viewpoints=NULL){
+  if(!("node.class" %in% names(GIObject@regions@elementMetadata))){
+    stop("object not annotated!")
+  }
+  
   if(is.null(node.classes)){
-    node.classes <- unique(c(anchorOne(GIObject)$node.class, anchorTwo(GIObject)$node.class))
+    node.classes <- unique(regions(GIObject)$node.class)
   }
 
   if(is.null(viewpoints)) {
@@ -233,19 +251,20 @@ categoriseInteractions <- function(GIObject, node.classes=NULL, viewpoints=NULL)
 
 #' Plot a bar chart of the number of interactions supported by different numbers of reads in your data.
 #'
-#' @param GIObject A GenomicInteractions object.
+#' @param GIObject A GInteractions object.
 #' @param normalise Logical. If TRUE, plots proportion of total reads instead of count.
 #' @param cut Numeric, can be NULL. Default: 10. All interactions with counts > cut are consolidated into a single category.
 #' @return A ggplot2 plot
-#' @import ggplot2
 #' @export
 #'
-#'  @examples
+#' @examples
 #' data(hic_example_data)
 #' plotCounts(hic_example_data)
 #' plotCounts(hic_example_data, normalise=TRUE)
 plotCounts <- function(GIObject, normalise=FALSE, cut = 10){
-  dat <-as.data.frame(table(interactionCounts(GIObject)), stringsAsFactors = FALSE)
+  counts <- interactionCounts(GIObject)
+  if(is.null(counts)){ stop("no count data to plot")}
+  dat <- as.data.frame(table(counts), stringsAsFactors = FALSE)
   ylabel <- "Count"
 
   if (normalise){
@@ -254,16 +273,16 @@ plotCounts <- function(GIObject, normalise=FALSE, cut = 10){
   }
 
   if (!is.null(cut)){
-    above_cut_sum <- sum(dat$Freq[as.numeric(dat$Var1) > cut])
-    dat <- dat[(as.numeric(dat$Var1) <= cut),]
+    above_cut_sum <- sum(dat$Freq[as.numeric(dat$counts) > cut])
+    dat <- dat[(as.numeric(dat$counts) <= cut),]
     dat <- rbind(dat, c(paste(">", cut), above_cut_sum))
     dat$Freq <- as.numeric(dat$Freq)
-    dat$Var1 <- factor(dat$Var1, levels=c(as.numeric(dat$Var1[1:nrow(dat)-1]), paste(">", cut)))
+    dat$counts <- factor(dat$counts, levels=c(as.numeric(dat$counts[1:nrow(dat)-1]), paste(">", cut)))
   }else{
-    dat$Var1 <- factor(dat$Var1, levels=c(as.numeric(dat$Var1)))
+    dat$counts <- factor(dat$counts, levels=c(as.numeric(dat$counts)))
   }
 
-  p <- ggplot(dat, aes_string(x="Var1", y="Freq")) +
+  p <- ggplot(dat, aes_string(x="counts", y="Freq")) +
     geom_bar(stat="identity", position="dodge") +
     xlab("Number of reads") +
     ylab(ylabel) +

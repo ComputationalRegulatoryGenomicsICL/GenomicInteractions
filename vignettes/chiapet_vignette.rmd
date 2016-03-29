@@ -38,6 +38,7 @@ First we need to load the GenomicInteractions package, and the mm9 reference gen
 
 ```{r imports, warning=F, results="hide"}
 library(GenomicInteractions)
+library(InteractionSet)
 library(GenomicRanges)
 ```
 
@@ -203,7 +204,7 @@ both anchors.
 We can finds any interactions involving a RefSeq promoter:
 
 ```{r overlaps_methods}
-subsetByFeatures(k562.rep1, refseq.promoters)
+subsetByFeatures(k562.rep1, unlist(refseq.promoters))
 ```
 
 However, one of the most powerful features in the `GenomicInteractions` package

@@ -31,6 +31,7 @@
 #'
 #' @import Gviz
 #' @import grid
+#' @importFrom stringr str_split
 #'
 #' @export InteractionTrack
 setClass("InteractionTrack",
@@ -335,13 +336,20 @@ setMethod("drawGD", signature("InteractionTrack"), function(GdObject, minBase, m
 #' 
 #' @return returns a list of the default display parameters.
 #' 
+#' @examples
+#' availableDisplayPars("InteractionTrack")
+#' 
 #' @importFrom Gviz availableDisplayPars
 #' @export
 availableDisplayPars = function(class){
+  if(!is.character(class))
+    class <- class(class)
+  
   if(class=="InteractionTrack"){
     parents <- names(getClassDef(class)@contains)
     
-    pars =try(sapply(c(parents, "InteractionTrack"), function(x) as(getClassDef(x)@prototype@dp, "list"), simplify=FALSE), silent=TRUE)
+    pars =try(sapply(c(parents, "InteractionTrack"), function(x) 
+      as(getClassDef(x)@prototype@dp, "list"), simplify=FALSE), silent=TRUE)
     finalPars <- list()
     inherited <- list()
     for(p in names(pars))
@@ -351,7 +359,8 @@ availableDisplayPars = function(class){
     }
     finalPars <- finalPars[order(names(finalPars))]
     inherited <- inherited[order(names(inherited))]
-    return(new("InferredDisplayPars", name=class, inheritance=unlist(inherited), finalPars)) 
+    return(new("InferredDisplayPars", name=class, 
+               inheritance=unlist(inherited), finalPars)) 
   }else{
     Gviz::availableDisplayPars(class)
   }

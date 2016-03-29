@@ -28,8 +28,11 @@ The data we are using comes from [this paper](http://genome.cshlp.org/content/23
 Load the data by specifying the file location and experiment type.  You can also include an experiment name and description. 
 
 ```{r imports, warning=F, results="hide", message=FALSE}
+library(Gviz)
 library(GenomicInteractions)
 library(GenomicRanges)
+library(InteractionSet)
+
 ```
 
 ```{r}
@@ -43,7 +46,8 @@ hic_data <- makeGenomicInteractionsFromFile(hic_file,
 seqlengths(hic_data) <- c(chr15 = 103494974, chr14 = 125194864)
 ```
 
-The `GenomicInteractions` object consists of two linked `GenomicRanges` objects containing the anchors of each interaction, and the number of reads supporting each interaction. Metadata for each interaction (in this case, p-values and FDRs) is stored as a `DataFrame` accessed by `mcols()` or `elementMetadata()`, similar to the metadata of a simple `GRanges`. You can also access single metadata columns using `$`.
+The `GenomicInteractions` class is an extension of the `GInteractions` class from the `InteractionSet` package. The object contains a set of regions involved in interactions, 
+stored as a `GRanges` object, and two sets of indices giving the regions involved in each interaction (the anchors). Metadata for each interaction (e.g. p-value, FDR) is stored as a `DataFrame` accessed by `mcols()` or `elementMetadata()`, similar to the metadata of a simple `GRanges`. You can also access single metadata columns using `$`.
 
 ```{r}
 hic_data
@@ -52,14 +56,24 @@ head(hic_data$LogP)
 hic_data$p.value <- exp(hic_data$LogP)
 ```
 
+The set of all regions included in the object can be accessed using `regions()`, or the first and second anchors of the interactions can be accessed using `anchors()`. You can also choose to just return the indices of the ranges of `regions()` that correspond to the anchors.
+
+We also provide convenience functions `anchorOne` and `anchorTwo` to return the first/second anchors as GRanges.
+
+```{r}
+regions(hic_data)
+anchors(hic_data, type = "first")
+head(anchors(hic_data, type = "first", id = TRUE))
+anchorOne(hic_data)
+```
+
 We can check that the anchors are of the expected size (100kb).
 
 ```{r}
-summary(width(anchorOne(hic_data)))
-summary(width(anchorTwo(hic_data)))
+summary(width(regions(hic_data)))
 ```
 
-Some anchors are shorter than 100kb due to the bin being at the end of a chromosome. There are `r length(hic_data)` interactions in total, with a total of `r sum(interactionCounts(hic_data))` reads supporting them. To calculate the average number of reads per interaction, first use `interactionCounts()` to get the interactionCounts of reads supporting each individual interaction. 
+Some anchors are shorter than 100kb due to the bin being at the end of a chromosome. There are `r length(hic_data)` interactions in total, with a total of `r sum(interactionCounts(hic_data))` reads supporting them. To calculate the average number of reads per interaction, first use `interactionCounts()` to get the number of reads supporting each individual interaction. 
 
 ```{r}
 head(interactionCounts(hic_data))
@@ -96,9 +110,11 @@ Subsetting by FDR will tend to remove interactions that are supported by fewer r
 
 ## Annotation 
 
-One of the most powerful features of GenomicInteractions is that it allows you to annotate interactions by whether the anchors overlap genomic features of interest, such as promoters or enhancers. However this process can be slow for large datasets, so here we annotate with just promoters. 
+One of the most powerful features of GenomicInteractions is that it allows you to annotate interactions by whether the anchors overlap genomic features of interest, such as promoters or enhancers. 
 
 Genome annotation data can be obtained from, for example, UCSC databases using the GenomicFeatures package. We will use promoters of Refseq genes extended to a width of 5kb. Downloading all the data can be a slow process, so the data for promoters for chromosomes 14 and 15 is provided with this package.
+
+We will also use a set of putative enhancers defined in Shen et al 2012 using mouse ENCODE data. 
 
 ```{r eval=FALSE}
 ## Not run
@@ -109,35 +125,56 @@ refseq.transcripts = transcriptsBy(mm9.refseq.db, by="gene")
 refseq.transcripts = refseq.transcripts[ names(refseq.transcripts) %in% unlist(refseq.genes$gene_id) ] 
 mm9_refseq_promoters <- promoters(refseq.transcripts, 2500,2500)
 mm9_refseq_promoters <- unlist(mm9_refseq_promoters[seqnames(mm9_refseq_promoters) %in% c("chr14", "chr15")])
+mm9_refseq_promoters <- unique(mm9_refseq_promoters) # some duplicate promoters from different transcript isoforms
+
+#get gene symbols
+mart = useMart("ensembl", dataset="mmusculus_gene_ensembl")
+genes <- getBM(attributes = c("mgi_symbol", "refseq_mrna"), filter = "refseq_mrna",
+               values = mm9_refseq_promoters$tx_name, mart = mart)
+mm9_refseq_promoters$geneSymbol <- genes$mgi_symbol[match(mm9_refseq_promoters$tx_name, genes$refseq_mrna)]
+
+names(mm9_refseq_promoters) <- mm9_refseq_promoters$geneSymbol
+na.symbol <- is.na(names(mm9_refseq_promoters))
+names(mm9_refseq_promoters)[na.symbol] <- mm9_refseq_promoters$tx_name[na.symbol]
+```
+
+```{r eval=FALSE}
+#Not run
+
+## get enhancers from http://chromosome.sdsc.edu/mouse/download.html
+download.file("http://chromosome.sdsc.edu/mouse/download/thymus.zip", "thymus.zip")
+unzip("thymus.zip")
+thymus_enh <- read.table("thymus/thymus.enhancer.txt", sep="\t", stringsAsFactors = FALSE)
+thymus_enh <- GRanges(seqnames=thymus_enh$V1, ranges=IRanges(thymus_enh$V2, width=1))
+thymus_enh <- resize(thymus_enh, fix="center", width=500)
+thymus_enh <- thymus_enh[seqnames(thymus_enh) %in% c("chr14", "chr15")]
+names(thymus_enh) <- paste("ENH", as.character(thymus_enh), sep = "_")
 ```
 
 `annotateInteractions` takes a list of features in GRanges or GRangesList format and annotates the interaction anchors based on overlap with these features. The list of annotation features should have descriptive names, as these names are stored in the annotated GenomicInteractions object and used to assign anchor (node) classes.
 
 ```{r}
 data("mm9_refseq_promoters")
-
-annotation.features <- list(promoter = mm9_refseq_promoters)
-
+data("thymus_enhancers")
+annotation.features <- list(promoter = mm9_refseq_promoters, enhancer = thymus_enh)
 annotateInteractions(hic_data_subset, annotation.features)
-hic_data_subset
 ```
 
-In addition, the features themselves should have names or IDs. For GRangesLists these names can be the `names()` of the items in the list. GRanges objects should have an "id" metadata column (note lowercase). These names or IDs for each feature are stored in the metadata for the anchors of the GenomicInteractions object. As each anchor may overlap multiple promoters, the "promoter.id" column is stored as a list. Promoter IDs can be accessed from the metadata of the anchors.
+In addition, the features themselves should have names or IDs. These can be the `names()` of the feature object, or an "id" metadata column (note lowercase). These names or IDs for each feature are stored in the metadata columns of the regions of the GenomicInteractions object. Each anchor may overlap multiple features of each type,  so the columns containing feature names or IDs are stored as lists.
 
 ```{r}
-anchorOne(hic_data_subset)
-head(anchorOne(hic_data_subset)$promoter.id)
+head(regions(hic_data_subset))
+head(regions(hic_data_subset)$promoter.id)
 ```
 
 ## Node classes
 
-Node classes (or anchor classes) are assigned to each anchor based on overlap with annotation features and the order of those features within the list passed to the annotation function. If the list is `list(promoter=..., transcript=...)` then an anchor which overlaps both a promoter and a transcript will be given the node class "promoter". The features earlier in the list take priority. Any anchors which are not annotated with any of the given features will be assigned the class "distal". In this case we have only annotated with one type of feature, so all anchors are either "promoter" or "distal".
+Node classes (or anchor classes) are assigned to each anchor based on overlap with annotation features and the order of those features within the list passed to the annotation function. If the list is `list(promoter=..., transcript=...)` then an anchor which overlaps both a promoter and a transcript will be given the node class "promoter". The features earlier in the list take priority. Any anchors which are not annotated with any of the given features will be assigned the class "distal". In this case anchors can be "promoter", "enhancer", or "distal".
 
-As the anchors are large, most of them overlap at least one promoter.
+As the anchors are large, most of them overlap at least one promoter or enhancer.
 
 ```{r}
-table(anchorOne(hic_data_subset)$node.class)
-table(anchorTwo(hic_data_subset)$node.class)
+table(regions(hic_data_subset)$node.class)
 ```
 
 ## Interaction types
@@ -145,10 +182,11 @@ table(anchorTwo(hic_data_subset)$node.class)
 Interaction types are determined by the classes of the interacting nodes. As we only have two node classes, we have three possible interaction classes, summarised in the plot below. Most of the interactions are between promoters. We can subset the data to look at interaction types that are of particular interest.
 
 ```{r }
-plotInteractionAnnotations(hic_data_subset)
+plotInteractionAnnotations(hic_data_subset, legend = TRUE)
 ```
 
-Distal regions interacting with a promoter may contain distal regulatory elements such as enhancers or insulators. To get all promoter--distal interactions:
+Distal regions interacting with a promoter may contain regulatory elements such as enhancers or insulators. To get all promoter--distal interactions:
+
 ```{r}
 length(hic_data_subset[isInteractionType(hic_data_subset, "promoter", "distal")])
 ```
@@ -159,17 +197,21 @@ length(hic_data_subset[is.pd(hic_data_subset)])
 sum(is.trans(hic_data_subset))
 ```
 
-To find the strongest promoter--distal interaction:
+However in this case we have annotated the anchors with known enhancer positions, so we can subset the data to get just enhancer--promoter interactions.
+
+To find the strongest promoter--enhancer interaction:
 ```{r}
-hic_data_pd <- hic_data_subset[is.pd(hic_data_subset)]
-max(interactionCounts(hic_data_pd))
-most_counts <- hic_data_pd[which.max(interactionCounts(hic_data_pd))]
+hic_data_ep <- hic_data_subset[isInteractionType(hic_data_subset, "promoter", "enhancer")]
+
+max(interactionCounts(hic_data_ep))
+most_counts <- hic_data_ep[which.max(interactionCounts(hic_data_ep))]
 most_counts
 ```
-Or the most significant promoter--distal interaction:
+
+Or the most significant promoter--enhancer interaction:
 ```{r}
-min(hic_data_pd$p.value)
-min_pval <- hic_data_pd[which.min(hic_data_pd$p.value)]
+min(hic_data_ep$p.value)
+min_pval <- hic_data_ep[which.min(hic_data_ep$p.value)]
 min_pval
 ```
 
@@ -181,9 +223,55 @@ calculateDistances(min_pval,method="midpoint")
 summary(calculateDistances(hic_data_subset,method="midpoint"))
 ```
 
+## Visualising interactions of interest
+
+The interaction with the highest number of counts in this dataset is between an anchor containing the promoter of a gene called Trib1, and an adjacent region containing more than ten putative enhancers.
+
+```{r}
+anchorOne(most_counts)$promoter.id
+anchorTwo(most_counts)$enhancer.id
+```
+
+`GenomicInteractions` provides methods to visualise interactions using the `Gviz` package in order to investigate regions of interest further. For example, we can view interactions in the region around the Trib1 promoter by creating an `InteractionTrack`.
+
+```{r}
+Trib1_region <- resize(mm9_refseq_promoters["Trib1"], fix = "center", width = 1000000)
+interaction_track <- InteractionTrack(hic_data_subset, name = "HiC", chromosome = "chr15")
+plotTracks(interaction_track, chromosome="chr15", 
+           from=start(Trib1_region), to=end(Trib1_region))
+```
+
+Using functions from the `Gviz` package we can add more data to the plot to visualise features in this region and customise how this data is displayed. Here interactions within the region of interest are coloured red, and interactions with other regions of chr15 are shown in blue. The height of the arcs representing the interactions is scaled to the number of counts supporting them. 
+
+```{r}
+promoterTrack <- AnnotationTrack(mm9_refseq_promoters, genome="mm9", name="Promoters",
+                             id=names(mm9_refseq_promoters),  featureAnnotation="id")
+enhTrack <- AnnotationTrack(thymus_enh, genome="mm9", name="Enhancers", stacking = "dense")
+
+displayPars(promoterTrack) <- list(fill = "deepskyblue", col = NA, 
+                                   fontcolor.feature = "black", fontsize=8,
+                                   just.group="below")
+displayPars(enhTrack) <- list(fill = "black", col = NA)
+displayPars(interaction_track) = list(col.interactions="red", 
+                                      col.anchors.fill ="blue",
+                                      col.anchors.line = "black",
+                                      interaction.dimension="height", 
+                                      interaction.measure ="counts",
+                                      plot.trans=FALSE,
+                                      plot.outside = TRUE, 
+                                      col.outside="lightblue", 
+                                      anchor.height = 0.1)
+
+plotTracks(list(interaction_track, promoterTrack, enhTrack),
+           chromosome="chr15", from=start(Trib1_region), to=end(Trib1_region), 
+           sizes=c(0.6, 0.2, 0.2))
+```
+
+You can see what customisation options are available for a Gviz track using `availableDisplayPars()`, and find more information about this and other track types in the Gviz vignette. 
+
 ## Export to BED12 format
 
-The interactions can be exported to [BED12 format](http://bedtools.readthedocs.org/en/latest/content/general-usage.html) for viewing in a genome browser. Anchors are visualised as thick blocks connected by thinner interactions. 
+Interactions stored in a `GenomicInteractions` object can be exported to [BED12 format](http://bedtools.readthedocs.org/en/latest/content/general-usage.html) for viewing in a genome browser. Anchors are visualised as thick blocks connected by thinner interactions. 
 
 ```{r, eval=FALSE}
 ## Not run
@@ -192,6 +280,8 @@ export.bed12(hic_data_subset, fn="hic_data_FDR0.1.bed", drop.trans = TRUE)
 
 ## References
 
-1. Heinz S, Benner C, Spann N, Bertolino E et al. Simple Combinations of Lineage-Determining Transcription Factors Prime cis-Regulatory Elements Required for Macrophage and B Cell Identities. Mol Cell 2010 May 28;38(4):576-589.
+1. Heinz S, Benner C, Spann N, Bertolino E et al. Simple Combinations of Lineage-Determining Transcription Factors Prime cis-Regulatory Elements Required for Macrophage and B Cell Identities. Mol Cell (2010).
 
-2. Seitan, V. C. et al. Cohesin-based chromatin interactions enable regulated gene expression within pre-existing architectural compartments. Genome Res. 23, 2066-77 (2013).
+2. Seitan, VC et al. Cohesin-based chromatin interactions enable regulated gene expression within pre-existing architectural compartments. Genome Research (2013).
+
+3. Shen, Y et al. A map of cis-regulatory sequences in the mouse genome. Nature (2012).

@@ -1,16 +1,13 @@
 gi <- new("GenomicInteractions",
-      metadata = list(experiment_name="test", description = "this is a test"),
-      anchor_one = GRanges(seqnames = S4Vectors::Rle(factor(c("chr1", "chr2", "chr1")), c(1, 2, 2)),
-                           ranges = IRanges(1:5, width = 10:6),
-                           strand = S4Vectors::Rle(strand(c("+", "+", "-", "-", "-"))),
-                           seqinfo = Seqinfo(seqnames = paste("chr", 1:2, sep=""))),
-      anchor_two = GRanges(seqnames = S4Vectors::Rle(factor(c("chr1", "chr2", "chr1")), c(2, 2, 1)),
-                           ranges = IRanges(7:3, width = 10:6),
-                           strand = S4Vectors::Rle(strand(c("-", "+", "-", "-", "-"))),
-                           seqinfo = Seqinfo(seqnames = paste("chr", 1:2, sep=""))),
-      counts = as.integer(1:5),
-      elementMetadata = new("DataFrame", nrows = as.integer(5))
-  )
+          metadata = list(experiment_name="test", description = "this is a test"),
+          anchor1 = as.integer(c(1, 7, 8, 4, 5)),
+          anchor2 = as.integer(c(6, 2, 10, 9, 3)),
+          regions = GRanges(seqnames = S4Vectors::Rle(factor(c("chr1", "chr2")), c(6, 4)),
+                            ranges = IRanges(start = c(1,6,3,4,5,7,2,3,4,5),
+                                             width = c(10,9,6,7,6,10,9,8,7,8)),
+                            strand = S4Vectors::Rle(c("+", "-", "+", "-"), c(2,4,1,3)),
+                            seqinfo = Seqinfo(seqnames = paste("chr", 1:2, sep=""))),
+          elementMetadata = DataFrame(counts = 1:5))
 
 promoters <- GRanges(seqnames = S4Vectors::Rle(factor(c("chr1", "chr2")), c(2, 1)),
                      ranges = IRanges(c(9, 14, 11), width = 4:6),
@@ -37,35 +34,18 @@ test_that("Annotate interactions returns expected results", {
 
 ## Annotation by setting mcols
 
-annotateAnchors(gi, 1, "signal", c(100, 102, 2, 320, 40))
-annotateAnchors(gi, 2, "signal", c(150, 62, 300, 0, 56))
-
-test_that("Annotate anchors returns expected results", {
-  expect_ann_one <- c(100, 102, 2, 320, 40)
-  expect_ann_two <-  c(150, 62, 300, 0, 56)
-
-  expect_true("signal" %in% names(mcols(anchorOne(gi))))
-  expect_true("signal" %in% names(mcols(anchorTwo(gi))))
-  expect_equal(anchorOne(gi)$signal, expect_ann_one)
-  expect_equal(anchorTwo(gi)$signal, expect_ann_two)
-  
-  expect_error(annotateAnchors(gi, 3, "signal", c(100, 102, 2, 320, 40)),
-               "anchor is neither 1 or 2")
-
-})
-
-## test summarisation
-
-test_that("summariseByFeatures results are the same as before", {
-  expect_equal_to_reference(summariseByFeatures(gi, promoters, feature.name = "promoter"),
-                            file = "summariseByFeatures.rds")
-})
-
-test_that("summariseByFeaturePairs results are the same as before", {
-  expect_equal_to_reference( summariseByFeaturePairs(gi, features.one = promoters, features.two = promoters, 
-                                                     feature.name.one = "promoter", feature.name.two = "promoter"),
-                            file = "summariseByFeaturePairs.rds")
-})
+# ## test summarisation
+# 
+# test_that("summariseByFeatures results are the same as before", {
+#   expect_equal_to_reference(summariseByFeatures(gi, promoters, feature.name = "promoter"),
+#                             file = "summariseByFeatures.rds")
+# })
+# 
+# test_that("summariseByFeaturePairs results are the same as before", {
+#   expect_equal_to_reference( summariseByFeaturePairs(gi, features.one = promoters, features.two = promoters, 
+#                                                      feature.name.one = "promoter", feature.name.two = "promoter"),
+#                             file = "summariseByFeaturePairs.rds")
+# })
 
 
 ## Resetting annotation
@@ -86,15 +66,13 @@ test_that("resetting annotations removes mcols", {
 
 test_that("distance calculations work as expected", {
   expect_equal(calculateDistances(gi),
-               c(5, NA, 1, NA, 1))
+               c(6, NA, 2, NA, 2))
   expect_equal(calculateDistances(gi, method = "midpoint"),
-               c(5, NA, 1, NA, 1))
+               c(6, NA, 2, NA, 2))
   expect_equal(calculateDistances(gi, method = "inner"),
-               c(0, NA, 0, NA, 0))
-  expect_warning(calculateDistances(gi, method = "inner"),
-                 "setting negative distances to 0, this is due to the presence of overlapping anchors in your dataset")
+               c(-4, NA, -6, NA, -4))
   expect_equal(calculateDistances(gi, method = "outer"),
-               c(14, NA, 8, NA, 6))
+               c(16, NA, 10, NA, 8))
   expect_error(calculateDistances(gi, method = "my_method"))
 })
 

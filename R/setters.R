@@ -1,14 +1,14 @@
-#' Functions to set data held in a GenomicInteractions object.
+#' Functions to set data held in a GInteractions object.
 #'
 #' Use these functions to set data stored in each of the slots of a
-#' GenomicInteractions object.
+#' GInteractions object.
 #'
 #' @name setters
 #' @param GIObject A GenomicInteractions object
 #' @param value A vector to replace a slot in the object
 #' @return GenomicInteractions object
-#'
-#'  @examples
+#' @rdname setters
+#' @examples
 #'
 #' library(GenomicRanges)
 #'
@@ -35,36 +35,35 @@ setGeneric("name<-",function(GIObject, value){standardGeneric ("name<-")})
 
 #' @rdname setters
 #' @export
-setGeneric("description<-",function(GIObject, value){standardGeneric ("description<-")})
-
-#' @rdname setters
-#' @export
 setGeneric("interactionCounts<-",function(GIObject, value){standardGeneric ("interactionCounts<-")})
 
 ## METHODS
 
 #' @rdname setters
 #' @export
-setReplaceMethod("name", "GenomicInteractions", function(GIObject, value){
+setReplaceMethod("name", "GInteractions", function(GIObject, value){
     GIObject@metadata$experiment_name = value
     GIObject
     })
 
 #' @rdname setters
+#' @inheritParams Biobase::'description<-'
+#' @importMethodsFrom Biobase 'description<-'
 #' @export
-setReplaceMethod("description", "GenomicInteractions", function(GIObject, value){
-    GIObject@metadata$description = value
-    GIObject
+setReplaceMethod("description", "GInteractions", function(object, value){
+    object@metadata$description = value
+    object
 })
 
 #' @rdname setters
 #' @import BiocGenerics
 #' @export
-setReplaceMethod("interactionCounts", "GenomicInteractions", function(GIObject, value){
+setReplaceMethod("interactionCounts", "GInteractions", function(GIObject, value){
     if (!all(value == floor(value)))
         stop("value must contain integer values")
     value = as.integer(value)
     if (length(value) == 1)
         value = rep(value, length(GIObject))
-    BiocGenerics:::replaceSlots(GIObject, counts=value)
+    GIObject@elementMetadata$counts <- value
+    GIObject
 })

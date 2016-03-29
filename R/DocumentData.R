@@ -55,3 +55,18 @@ NULL
 #' @format A GRanges object
 #' @return A GRanges object.
 NULL
+
+#' Putative enhancers from mouse thymus data
+#' 
+#' This dataset contains a set of mouse thymus enhancers derived from ChIP-seq data
+#' from mouse thymus, as described in Shen et al. 2012. See the HiC analysis vignette 
+#' for more details. (\code{vignettes(GenomicInteractions)}). 
+#' 
+#' @name thymus_enh
+#' @docType data
+#' @keywords datasets
+#' @usage data("thymus_enhancers")
+#' @format A GRanges object
+#' @return A GRanges object
+#' @references Shen, Y et al. A map of cis-regulatory sequences in the mouse genome. Nature (2012).
+NULL

@@ -1,6 +1,6 @@
 #' Virtual 4C viewpoint
 #'
-#' This function creates a GenomicInteractions object representing interactions 
+#' This function creates a GInteractions object representing interactions 
 #' originating at a given viewpoint ("bait"), or set of viewpoints. This is 
 #' similar to the idea of a virtual 4C experiment where you are interested in 
 #' interactions with a specific region. 
@@ -17,41 +17,38 @@
 #' as a wig or bedgraph file.
 #' 
 #' 
-#' @param x A GenomicInteractions object.
+#' @param x A GInteractions object.
 #' @param bait A GRanges object describing bait regions.
-#' @param region If present, a GenomicInteractions object specifying the
+#' @param region If present, a GRanges object specifying the
 #'               region to look for bait interactions in.
 #' @param ... additional arguments to findoverlaps
 #' 
-#' @return A GenomicInteractions object.
+#' @return A GInteractions object.
 #' 
-#' @import IRanges GenomicRanges
+#' @import GenomicRanges
 #' @export
 #' @examples
-#' \dontrun{
-#' data(hic_data)
+#' data(hic_example_data)
 #' library(GenomicRanges)
-#' pos <- GRanges(seqnames="chr5", ranges=IRanges(start=115938063, end=115941352))
-#' region <- GRanges(seqnames="chr5", ranges=IRanges(start=115838063, end=116041352))
-#' viewPoint(hic_data, pos, region)
-#' }
+#' pos <- GRanges(seqnames="chr15", ranges=IRanges(start=59477709, end=59482708))
+#' region <- GRanges(seqnames="chr15", ranges=IRanges(start=58980209, end=59980208))
+#' vp <- viewPoint(hic_example_data, pos, region)
 viewPoint = function(x, bait, region=NULL, ...) {
-    if (any(names(mcols(anchorOne(x))) != names(mcols(anchorTwo(x))))) {
-        warning("Metadata differs between anchors and will be lost.")
-        mcols(x@anchor_one) = NULL
-        mcols(x@anchor_two) = NULL
-    }
-    hits = findOverlaps(x, bait, ...)
-    if (length(hits) == 0) return(GenomicInteractions())
-    vp = GenomicInteractions(anchor_one=bait[c(subjectHits(hits$one), 
+  hits <- list()  
+  hits$one <- findOverlaps(x, bait, use.region = "first")
+  hits$two <- findOverlaps(x, bait, use.region = "second")
+  if (length(hits) == 0) return(GenomicInteractions())
+  vp <- GenomicInteractions(anchor1 = bait[c(subjectHits(hits$one), 
                                           subjectHits(hits$two))],
-                             anchor_two=c(x@anchor_two[queryHits(hits$one)], 
-                                          x@anchor_one[queryHits(hits$two)]),
-                             counts=c(x@counts[queryHits(hits$one)], 
-                                      x@counts[queryHits(hits$two)]))
-    if (!is.null(region)) { vp = x[overlapsAny(x@anchor_two, region, ...)] }
-    ord = order(vp@anchor_one, vp@anchor_two)
-    return(vp[ord])
+                             anchor2 = c(anchorTwo(x)[queryHits(hits$one)], 
+                                          anchorOne(x)[queryHits(hits$two)]),
+                             counts = c(interactionCounts(x)[queryHits(hits$one)], 
+                                      interactionCounts(x)[queryHits(hits$two)]))
+  if (!is.null(region)) { 
+    vp <- x[overlapsAny(anchorTwo(x), region, ...)] 
+    }
+  ord = order(vp)
+  return(vp[ord])
 }
 
 #' Plot coverage around a virtual 4C viewpoint
@@ -60,7 +57,7 @@ viewPoint = function(x, bait, region=NULL, ...) {
 #' the output of `viewPoint()` as input. You should additionally specify the total 
 #' region you wish to plot. 
 #'
-#' @param x a GenomicInteractions object which is output from viewPoint
+#' @param x a GInteractions object which is output from viewPoint
 #' @param region The genomic region to plot
 #' @param ylab Y axis label.
 #' @param xlab X axis label. By default this is the chromosome of the region 
@@ -69,12 +66,22 @@ viewPoint = function(x, bait, region=NULL, ...) {
 #' 
 #' @return Coverage that is plotted (invisibly)
 #'
-#' @import IRanges GenomicRanges
+#' @examples
+#' data(hic_example_data)
+#' library(GenomicRanges)
+#' pos <- GRanges(seqnames="chr15", ranges=IRanges(start=59477709, end=59482708))
+#' region <- GRanges(seqnames="chr15", ranges=IRanges(start=58980209, end=59980208))
+#' vp <- viewPoint(hic_example_data, pos, region)
+#' plotViewpoint(vp, region)
+#'
+#' @import GenomicRanges
+#' @importFrom graphics plot
 #' @export
+#' 
 plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
     if (length(region) > 1) stop("region must be a single range")
-    x = x[overlapsAny(x@anchor_two, region, type="within")]
-    cov = as(coverage(x@anchor_two, weight = interactionCounts(x))[region], "GRanges")
+    x = x[overlapsAny(anchorTwo(x), region, type="within")]
+    cov = as(coverage(anchorTwo(x), weight = interactionCounts(x))[region], "GRanges")
     points_x = c(start(cov), end(cov)) + start(region)
     points_y = rep.int(cov$score, 2)
     ord = order(points_x)
@@ -94,7 +101,7 @@ plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
 #' Plots summarised coverage of interactions around a set of viewpoints, 
 #' e.g. promoters. This function requires the output of `viewPoint()` as input. 
 #'
-#' @param x A GenomicInteractions object which is output from viewPoint
+#' @param x A GInteractions object which is output from viewPoint
 #' @param left_dist Distance 'left' of interactions to consider, in bp.
 #' @param right_dist Distance 'right' of interactions to consider, in bp.
 #' @param fix One of "center", "start", "end". Passed to `resize`. Interaction 
@@ -105,7 +112,15 @@ plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
 #' 
 #' @return  Coverage that is plotted (invisibly)
 #'
+#' @examples
+#' data(hic_example_data)
+#' library(GenomicRanges)
+#' pos <- GRanges(seqnames="chr15", ranges=IRanges(start=59477709, end=59482708))
+#' region <- GRanges(seqnames="chr15", ranges=IRanges(start=58980209, end=59980208))
+#' vp <- viewPoint(hic_example_data, pos, region)
+#' plotAvgViewpoint(vp, left_dist = 1000000, right_dist = 100000)
 #' @import GenomicRanges
+#' @importFrom S4Vectors runValue
 #' @export
 plotAvgViewpoint = function(x, left_dist = 100000, right_dist = 100000, ylab="Average signal", 
                             xlab="Relative position", fix = "center",...) {
