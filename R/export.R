@@ -14,7 +14,7 @@
 #'
 #' @return invisible(1) if outputting to file or a data.frame containing all of the corresponding information
 #' @export
-#' @examples 
+#' @examples
 #' data(hic_example_data)
 #' export.bed12(hic_example_data, fn = tempfile(), score = "counts", drop.trans=TRUE)
 #' @docType methods
@@ -24,82 +24,18 @@ setGeneric("export.bed12",function(GIObject, fn=NULL, score="counts", drop.trans
 #' @rdname export.bed12
 #' @export
 #' @importFrom utils write.table
+#' @importFrom rtracklayer export
 setMethod("export.bed12", c("GInteractions"),
         function(GIObject, fn=NULL, score="counts", drop.trans=c(FALSE, TRUE)){
-           
-          
-           # drop.trans not used???
-            GIObject = sort(GIObject) # to do: check this sorting is okay
-
-            is_trans = is.trans(GIObject)
-            cis = GIObject[!is_trans]
-            trans = GIObject[is_trans]
-
-            len = length(cis)
-            s1 = as.vector(strand(anchorOne(cis)))
-            s2 = as.vector(strand(anchorTwo(cis)))
-
-            score_vector = .getScore(cis, score)
-            if (is.null(score_vector)) stop("Supplied score field not in element metadata.")
-            
-            output_cis = data.frame(
-                chr=as.character(seqnames(anchorOne(cis))),
-                start=start(anchorOne(cis))-1,
-                end=end(anchorTwo(cis)),
-                name=.exportName(cis),
-                score=score_vector,
-                strand=ifelse(s1 == s2 & s1 %in% c("+", "-"), s1, "."), # avoid case where strand == "*"
-                thickStart=start(anchorOne(cis))-1,
-                thickEnd=end(anchorTwo(cis)),
-                itemRgb=rep("255,0,0", len),
-                blockCount=2,
-                blockSizes=paste(as.character(width(anchorOne(cis))),
-                                 as.character(width(anchorTwo(cis))), sep=","),
-                                 blockStarts=paste(0, start(anchorTwo(cis)) - start(anchorOne(cis)), sep=","),
-                stringsAsFactors = FALSE)
-
-            score_vector = .getScore(trans, score)
-            if (is.null(score_vector)) stop("Supplied score field not in element metadata.")
-            output_trans = data.frame(
-                chr=c(as.character(seqnames(anchorOne(trans))),
-                      as.character(seqnames(anchorTwo(trans)))),
-                start=c(as.character(start(anchorOne(trans))),
-                        as.character(start(anchorTwo(trans)))),
-                end=c(as.character(end(anchorOne(trans))),
-                      as.character(end(anchorTwo(trans)))),
-                name=rep(.exportName(trans), 2),
-                score=rep(score_vector, 2),
-                strand=c(as.character(strand(anchorOne(trans))),
-                         as.character(strand(anchorTwo(trans)))),
-                thickStart=c(as.character(start(anchorOne(trans))),
-                             as.character(start(anchorTwo(trans)))),
-                thickEnd=c(as.character(end(anchorOne(trans))),
-                           as.character(end(anchorTwo(trans)))),
-                itemRgb=rep("255,0,0", length(trans)),
-                blockCount=1,
-                blockSizes=c(as.character(width(anchorOne(trans))), as.character(width(anchorTwo(trans)))),
-                blockStarts=0,
-                stringsAsFactors = FALSE)
-
+            bed = asBED(GIObject)
             if (!is.null(fn)) {
-                write.table(output_cis, fn, sep="\t", col.names=FALSE, quote=FALSE, row.names=FALSE )
-                write.table(output_trans, fn, sep="\t", col.names=FALSE, quote=FALSE, row.names=FALSE, append=TRUE)
+                # write.table(as.data.frame(bed), fn, sep="\t", col.names=FALSE, quote=FALSE, row.names=FALSE )
+                export(bed, fn, format="bed")
                 return(invisible(1))
 			} else {
-                return(rbind(output_cis, output_trans))
+                return(bed)
 			}
 })
-
-.exportName = function(gi) {
-    paste0(
-        seqnames(anchorOne(gi)), ":",
-        start(anchorOne(gi)) - 1 , "..",
-        end(anchorOne(gi)), "-",
-        seqnames(anchorTwo(gi)), ":",
-        start(anchorTwo(gi)) - 1, "..",
-        end(anchorTwo(gi)), ",",
-        interactionCounts(gi))
-}
 
 #' Export interactions in BED Paired-End format.
 #'
@@ -117,7 +53,7 @@ setMethod("export.bed12", c("GInteractions"),
 #' @docType methods
 #' @rdname export.bedpe
 #' @export
-#' @examples 
+#' @examples
 #' data(hic_example_data)
 #' export.bedpe(hic_example_data, fn = tempfile(), score = "counts")
 setGeneric("export.bedpe", function(GIObject, fn=NULL, score="counts"){ standardGeneric("export.bedpe")} )
@@ -164,7 +100,7 @@ setMethod("export.bedpe", c("GInteractions"), function(GIObject, fn=NULL, score=
 #' @docType methods
 #' @rdname export.chiasig
 #' @export
-#' @examples 
+#' @examples
 #' data(hic_example_data)
 #' export.chiasig(hic_example_data, fn = tempfile(), score = "counts")
 setGeneric("export.chiasig", function(GIObject, fn=NULL, score="counts"){ standardGeneric("export.chiasig")} )
@@ -193,6 +129,8 @@ setMethod("export.chiasig", c("GInteractions"), function(GIObject, fn=NULL, scor
         ans = interactionCounts(x)
     else
         ans = mcols(x)[[score]]
+    if (is.null(ans))
+        ans = rep(0, length(x))
     ans
 }
 
@@ -204,3 +142,118 @@ setMethod("export.chiasig", c("GInteractions"), function(GIObject, fn=NULL, scor
     names
 }
 
+#' Coerce to BED structure
+#'
+#' Coerce the structure of an object to one following BED-like
+#' conventions, i.e., with columns for blocks and thick regions.
+#'
+#' @param x Generally, a tabular object to structure as BED
+#' @param keep.mcols logical whether to keep non-BED12 columns in final
+#'                   output (may cause problems with some parsers).
+#' @param score character, which field to export as "score" in BED12.
+#'              Defaults to "auto" which will choose score, then counts,
+#'              if present, or fill column with zeros.
+#'
+#' @param ... Arguments to pass to methods
+#'
+#'      The exact behavior depends on the class of `object`.
+#'
+#'      `GRangesList` This treats `object` as if it were a list of
+#'           transcripts, i.e., each element contains the exons of a
+#'           transcript. The `blockStarts` and `blockSizes` columns are
+#'           derived from the ranges in each element. Also, add `name`
+#'           column from `names(object)`.
+#'
+#' @return A `GRanges`, with the metadata columns `name`, `blockStarts` and
+#'         `blockSizes` added.
+#'
+#' @importFrom rtracklayer asBED
+#' @export
+#' @docType methods
+#' @examples
+#' data(hic_example_data)
+#' asBED(hic_example_data)
+setMethod("asBED", c("GInteractions"),
+    function(x, keep.mcols=FALSE, score="score") {
+        if (!is.null(names(x)) || !is.null(x$name))
+            warning("Names will be dropped during BED12 export")
+
+        x = swapAnchors(x, mode="order")
+
+        is_trans = as.vector(seqnames(regions(x))[x@anchor1] != seqnames(regions(x))[x@anchor2])
+        a1_cis = x@anchor1[!is_trans]
+        a2_cis = x@anchor2[!is_trans]
+        a1_trans = x@anchor1[is_trans]
+        a2_trans = x@anchor2[is_trans]
+
+        scores = .getScore(x, score)
+
+        if (is.null(x$color)) {
+            x$color = "#000000"
+        }
+
+        names = .exportName(x, scores)
+
+        output_cis = GRanges(
+            seqnames=as.character(seqnames(x@regions)[a1_cis]),
+            IRanges(start=start(x@regions)[a1_cis]-1,
+                    end=end(x@regions)[a2_cis]),
+            name=names[!is_trans],
+            score=scores[!is_trans],
+            strand=ifelse(
+                strand(x@regions)[a1_cis] == strand(x@regions)[a2_cis] &
+                       as.vector(strand(x@regions)[a1_cis]) %in% c("+", "-"),
+                as.vector(strand(x@regions)[a1_cis]),
+                "*"),
+            thickStart=start(x@regions)[a1_cis],
+            thickEnd=end(x@regions)[a2_cis],
+            itemRgb=x$color[a1_cis],
+            blockCount=rep(2, length(a1_cis)),
+            blockSizes=paste(as.character(width(x@regions)[a1_cis]),
+                                as.character(width(x@regions)[a2_cis]), sep=","),
+            blockStarts=paste(0, start(x@regions)[a2_cis] - start(x@regions)[a1_cis], sep=",")
+        )
+
+        output_trans = GRanges(
+            seqnames=c(as.character(seqnames(x@regions)[a1_trans]),
+                    as.character(seqnames(x@regions)[a2_trans])),
+            IRanges(start=c(start(x@regions)[a1_trans],
+                            start(x@regions)[a2_trans]),
+                    end=c(end(x@regions)[a1_trans],
+                            end(x@regions)[a2_trans])),
+            name=rep(names[is_trans], 2),
+            score=rep(scores[is_trans], 2),
+            strand=c(as.character(strand(x@regions)[a1_trans]),
+                        as.character(strand(x@regions)[a2_trans])),
+            thickStart=c(start(x@regions)[a1_trans],
+                         start(x@regions)[a2_trans]),
+            thickEnd=c(end(x@regions)[a1_trans],
+                       end(x@regions)[a2_trans]),
+            itemRgb=c(x$color[a1_trans], x$color[a2_trans]),
+            blockCount=1,
+            blockSizes=c(as.character(width(x@regions)[a1_trans]),
+                         as.character(width(x@regions)[a2_trans])),
+            blockStarts=0)
+
+        extra_cols = setdiff(colnames(mcols(x)), c("score", "name"))
+
+        if(length(extra_cols) && keep.mcols==TRUE) {
+            mcols(output_cis) = cbind(mcols(output_cis), mcols(x)[!is_trans, extra_cols,drop=FALSE])
+            mcols(output_trans) =
+                cbind(mcols(output_trans),
+                      rep(mcols(x)[is_trans, extra_cols,drop=FALSE], 2))
+        }
+
+        return(sort(c(output_cis, output_trans)))
+})
+
+.exportName = function(gi, score=0) {
+    paste0(
+        seqnames(gi@regions)[gi@anchor1], ":",
+        start(gi@regions)[gi@anchor1] - 1 , "..",
+        end(gi@regions)[gi@anchor1], "-",
+        seqnames(gi@regions)[gi@anchor2], ":",
+        start(gi@regions)[gi@anchor2] - 1, "..",
+        end(gi@regions)[gi@anchor2], ",",
+        score)
+}
