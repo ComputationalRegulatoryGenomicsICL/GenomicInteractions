@@ -6,20 +6,17 @@
 \alias{export.bed12,GInteractions-method}
 \title{Export interactions in BED12 format.}
 \usage{
-export.bed12(GIObject, fn = NULL, score = "counts", drop.trans = c(FALSE,
-  TRUE))
+export.bed12(GIObject, fn = NULL, score = "counts")
 
 \S4method{export.bed12}{GInteractions}(GIObject, fn = NULL,
-  score = "counts", drop.trans = c(FALSE, TRUE))
+  score = "counts")
 }
 \arguments{
 \item{GIObject}{A GInteractions object.}
 
 \item{fn}{A filename to write the object to}
 
-\item{score}{Which metadata column to export as score}
-
-\item{drop.trans}{Logical indicating whether to drop trans interactions.
+\item{score}{Which metadata column to export as score
 
 Exports a GInteractions object to BED12 format, and writes to a specified file. If filename is not specified,
 then a data.frame containing the information is returned.

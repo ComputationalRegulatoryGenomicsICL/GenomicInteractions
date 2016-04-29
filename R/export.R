@@ -3,7 +3,6 @@
 #' @param GIObject  A GInteractions object.
 #' @param fn        A filename to write the object to
 #' @param score     Which metadata column to export as score
-#' @param drop.trans Logical indicating whether to drop trans interactions.
 #'
 #' Exports a GInteractions object to BED12 format, and writes to a specified file. If filename is not specified,
 #' then a data.frame containing the information is returned.
@@ -20,19 +19,35 @@
 #' @docType methods
 #' @rdname export.bed12
 
-setGeneric("export.bed12",function(GIObject, fn=NULL, score="counts", drop.trans=c(FALSE, TRUE)){standardGeneric ("export.bed12")})
+setGeneric("export.bed12",function(GIObject, fn=NULL, score="counts"){standardGeneric ("export.bed12")})
 #' @rdname export.bed12
 #' @export
 #' @importFrom utils write.table
 #' @importFrom rtracklayer export
 setMethod("export.bed12", c("GInteractions"),
-        function(GIObject, fn=NULL, score="counts", drop.trans=c(FALSE, TRUE)){
-            bed = asBED(GIObject)
+        function(GIObject, fn=NULL, score="counts"){
+            bed = asBED(GIObject, score)
             if (!is.null(fn)) {
-                # write.table(as.data.frame(bed), fn, sep="\t", col.names=FALSE, quote=FALSE, row.names=FALSE )
                 export(bed, fn, format="bed")
                 return(invisible(1))
 			} else {
+			    blocks = bed$blocks
+			    bed$blocks = NULL
+			    strand_info = as.character(strand(bed))
+			    strand_info[strand_info == "*"] = NA
+			    df = data.frame(
+			        seqnames=seqnames(bed),
+			        start=start(bed)-1,
+			        end=end(bed),
+			        names=bed$name,
+			        score=bed$score,
+			        strand=strand_info,
+			        thickStart=bed$thickStart,
+			        thickEnd=bed$thickEnd,
+			        itemRgb=apply(col2rgb(bed$itemRgb), 2, paste, collapse=","),
+			        blockCount=elementNROWS(blocks),
+			        blockStarts=unlist(lapply(start(blocks), paste, collapse = ","), use.names=FALSE),
+			        blockSizes=unlist(lapply(width(blocks), paste, collapse = ","), use.names=FALSE))
                 return(bed)
 			}
 })
@@ -194,9 +209,14 @@ setMethod("asBED", c("GInteractions"),
 
         names = .exportName(x, scores)
 
+        cis_blocks = relist(IRanges(
+                start=c(rbind(rep(1L, length(a1_cis)), start(x@regions)[a2_cis] - start(x@regions)[a1_cis] + 1L)),
+                width=c(rbind(width(x@regions)[a1_cis], width(x@regions)[a2_cis]))),
+            PartitioningByWidth(rep(2, length(a1_cis))))
+
         output_cis = GRanges(
             seqnames=as.character(seqnames(x@regions)[a1_cis]),
-            IRanges(start=start(x@regions)[a1_cis]-1,
+            IRanges(start=start(x@regions)[a1_cis],
                     end=end(x@regions)[a2_cis]),
             name=names[!is_trans],
             score=scores[!is_trans],
@@ -207,12 +227,14 @@ setMethod("asBED", c("GInteractions"),
                 "*"),
             thickStart=start(x@regions)[a1_cis],
             thickEnd=end(x@regions)[a2_cis],
-            itemRgb=x$color[a1_cis],
-            blockCount=rep(2, length(a1_cis)),
-            blockSizes=paste(as.character(width(x@regions)[a1_cis]),
-                                as.character(width(x@regions)[a2_cis]), sep=","),
-            blockStarts=paste(0, start(x@regions)[a2_cis] - start(x@regions)[a1_cis], sep=",")
+            itemRgb=x$color[!is_trans],
+            blocks=cis_blocks
         )
+
+        trans_blocks = relist(IRanges(
+                start=rep(1, 2*length(a1_trans)),
+                width=c(width(x@regions)[a1_trans], width(x@regions)[a2_trans])),
+            PartitioningByWidth(rep(1, 2*length(a1_trans))))
 
         output_trans = GRanges(
             seqnames=c(as.character(seqnames(x@regions)[a1_trans]),
@@ -229,11 +251,9 @@ setMethod("asBED", c("GInteractions"),
                          start(x@regions)[a2_trans]),
             thickEnd=c(end(x@regions)[a1_trans],
                        end(x@regions)[a2_trans]),
-            itemRgb=c(x$color[a1_trans], x$color[a2_trans]),
-            blockCount=1,
-            blockSizes=c(as.character(width(x@regions)[a1_trans]),
-                         as.character(width(x@regions)[a2_trans])),
-            blockStarts=0)
+            itemRgb=rep(x$color[is_trans], 2),
+            blocks=trans_blocks
+        )
 
         extra_cols = setdiff(colnames(mcols(x)), c("score", "name"))
 
