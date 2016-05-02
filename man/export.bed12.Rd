@@ -33,6 +33,6 @@ Export interactions in BED12 format.
 }
 \examples{
 data(hic_example_data)
-export.bed12(hic_example_data, fn = tempfile(), score = "counts", drop.trans=TRUE)
+export.bed12(hic_example_data, fn = tempfile(), score = "counts")
 }
 

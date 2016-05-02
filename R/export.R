@@ -15,7 +15,7 @@
 #' @export
 #' @examples
 #' data(hic_example_data)
-#' export.bed12(hic_example_data, fn = tempfile(), score = "counts", drop.trans=TRUE)
+#' export.bed12(hic_example_data, fn = tempfile(), score = "counts")
 #' @docType methods
 #' @rdname export.bed12
 
@@ -24,6 +24,7 @@ setGeneric("export.bed12",function(GIObject, fn=NULL, score="counts"){standardGe
 #' @export
 #' @importFrom utils write.table
 #' @importFrom rtracklayer export
+#' @importFrom grDevices col2rgb
 setMethod("export.bed12", c("GInteractions"),
         function(GIObject, fn=NULL, score="counts"){
             bed = asBED(GIObject, score)
@@ -183,6 +184,8 @@ setMethod("export.chiasig", c("GInteractions"), function(GIObject, fn=NULL, scor
 #'         `blockSizes` added.
 #'
 #' @importFrom rtracklayer asBED
+#' @importFrom IRanges PartitioningByWidth
+#' @importFrom S4Vectors elementNROWS
 #' @export
 #' @docType methods
 #' @examples
