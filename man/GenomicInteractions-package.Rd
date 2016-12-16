@@ -2,15 +2,12 @@
 % Please edit documentation in R/GenomicInteractions-package.R
 \docType{package}
 \name{GenomicInteractions-package}
-\alias{GenomicInteractions}
 \alias{GenomicInteractions-package}
-\title{A package for looking at genomic interaction data.}
+\title{GenomicInteractions: A package for analysing chromosome conformation}
 \description{
-@name GenomicInteractions-package
- @docType package
- @import methods
- @examples 
- library(GenomicInteractions)
- GenomicInteractions()
+GenomicInteractions: A package for analysing chromosome conformation
+}
+\examples{
+library(GenomicInteractions)
 }
 

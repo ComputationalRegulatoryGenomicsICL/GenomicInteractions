@@ -1,10 +1,9 @@
-#' A package for looking at genomic interaction data.
+#' GenomicInteractions: A package for analysing chromosome conformation
 #'
-#'  @name GenomicInteractions-package
-#'  @docType package
-#'  @import methods
-#'  @examples 
-#'  library(GenomicInteractions)
-#'  GenomicInteractions()
-#'  
-"_PACKAGE"
+#' @name GenomicInteractions-package
+#' @rdname GenomicInteractions-package
+#' @docType package
+#' @import methods
+#' @examples
+#' library(GenomicInteractions)
+NULL
