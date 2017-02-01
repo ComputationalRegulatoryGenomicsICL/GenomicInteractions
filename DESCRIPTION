@@ -2,7 +2,7 @@ Package: GenomicInteractions
 Type: Package
 Title: R package for handling genomic interaction data
 URL: https://github.com/ComputationalRegulatoryGenomicsICL/GenomicInteractions/
-Version: 1.9.1
+Version: 1.9.2
 Date: 2015-07-20
 Author: Harmston, N., Ing-Simmons, E., Perry, M., Baresic, A., Lenhard,
     B.
@@ -22,7 +22,7 @@ Imports:
     gridExtra,
     methods,
     igraph,
-    S4Vectors,
+    S4Vectors (>= 0.13.13),
     dplyr,
     Gviz,
     Biobase,
