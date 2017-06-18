@@ -121,7 +121,7 @@ setMethod("GenomicInteractions", c("numeric", "numeric", "GRanges"),
           })
 
 #' @rdname GenomicInteractions
-setMethod("GenomicInteractions", c("GRanges", "GRanges", "GenomicRangesORmissing"),
+setMethod("GenomicInteractions", c("GRanges", "GRanges", "GenomicRanges_OR_missing"),
           function(anchor1, anchor2, counts, ...){
             if(missing(counts)){
               GenomicInteractions(GInteractions(anchor1, anchor2, ...))
@@ -131,7 +131,7 @@ setMethod("GenomicInteractions", c("GRanges", "GRanges", "GenomicRangesORmissing
           })
 
 #' @rdname GenomicInteractions
-setMethod("GenomicInteractions", c("missing", "missing", "GenomicRangesORmissing"),
+setMethod("GenomicInteractions", c("missing", "missing", "GenomicRanges_OR_missing"),
           function(anchor1, anchor2, counts, ...){
             if(missing(counts)){
               GenomicInteractions(GInteractions())

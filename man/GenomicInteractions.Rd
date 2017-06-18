@@ -6,9 +6,9 @@
 \alias{GenomicInteractions,ANY,ANY,ANY-method}
 \alias{GenomicInteractions,GInteractions,ANY,ANY-method}
 \alias{GenomicInteractions,GInteractions,numeric,ANY-method}
-\alias{GenomicInteractions,GRanges,GRanges,GenomicRangesORmissing-method}
+\alias{GenomicInteractions,GRanges,GRanges,GenomicRanges_OR_missing-method}
 \alias{GenomicInteractions,GRanges,GRanges,numeric-method}
-\alias{GenomicInteractions,missing,missing,GenomicRangesORmissing-method}
+\alias{GenomicInteractions,missing,missing,GenomicRanges_OR_missing-method}
 \alias{GenomicInteractions,numeric,numeric,GRanges-method}
 \title{Function to create a GenomicInteractions object}
 \usage{
@@ -24,10 +24,10 @@ GenomicInteractions(anchor1, anchor2, counts, ...)
 \S4method{GenomicInteractions}{numeric,numeric,GRanges}(anchor1, anchor2,
   counts, ...)
 
-\S4method{GenomicInteractions}{GRanges,GRanges,GenomicRangesORmissing}(anchor1,
+\S4method{GenomicInteractions}{GRanges,GRanges,GenomicRanges_OR_missing}(anchor1,
   anchor2, counts, ...)
 
-\S4method{GenomicInteractions}{missing,missing,GenomicRangesORmissing}(anchor1,
+\S4method{GenomicInteractions}{missing,missing,GenomicRanges_OR_missing}(anchor1,
   anchor2, counts, ...)
 
 \S4method{GenomicInteractions}{ANY,ANY,ANY}(anchor1, anchor2, counts, ...)
