@@ -163,7 +163,7 @@ setMethod("annotateInteractions", c("GInteractions", "list"),
 })
 
 .get_gr_names = function(x) {
-    if (class(x)=="GRanges") { 
+    if (is(x, "GRanges")) {
         if (!is.null(names(x))) {
             value = names(x)
         } else if("id" %in% names(mcols(x))) {
@@ -171,7 +171,7 @@ setMethod("annotateInteractions", c("GInteractions", "list"),
         } else {
             stop("annotations requires an id column in elementMetadata or names to be non-null")
         }
-    } else if(class(x)=="GRangesList") {
+    } else if(is(x, "GRangesList")) {
         value = names(x)
     } else {
         stop("annotations must be GRanges or GRangesList objects")
