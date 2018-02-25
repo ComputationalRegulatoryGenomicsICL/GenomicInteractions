@@ -6,8 +6,7 @@ Version: 1.13.2
 Date: 2015-07-20
 Author: Harmston, N., Ing-Simmons, E., Perry, M., Baresic, A., Lenhard,
     B.
-Maintainer: Malcolm Perry <mgperry32@gmail.com>,
-    Liz Ing-Simmons <liz.ing-simmons12@csc.mrc.ac.uk>
+Maintainer: Liz Ing-Simmons <liz.ingsimmons@gmail.com>
 Imports:
     Rsamtools,
     rtracklayer,
