@@ -158,20 +158,24 @@ setMethod("updateObject", signature(object="GenomicInteractions"),
           function(object, ..., verbose = FALSE){
             if (verbose){message("updating GenomicInteractions object")}
             
-            anchor1 <- object@anchor_one
-            anchor2 <- object@anchor_two
-            all_anchors <- unique(c(object@anchor_one, object@anchor_two))
-            mcols(anchor1) <- NULL
-            mcols(anchor2) <- NULL
-            
-            em <- DataFrame(counts = object@counts, object@elementMetadata)
-            
-            newobj <- GInteractions(anchor1, anchor2, 
-                                    all_anchors,
-                                    metadata = object@metadata,
-                                    elementMetadata = em)
-            
-            class(newobj) <- "GenomicInteractions"
-            names(mcols(newobj)) <- gsub("elementMetadata.", "", names(mcols(newobj)))
-            newobj
+            if ("anchor_one" %in% names(getObjectSlots(object))){
+              anchor1 <- object@anchor_one
+              anchor2 <- object@anchor_two
+              all_anchors <- unique(c(object@anchor_one, object@anchor_two))
+              mcols(anchor1) <- NULL
+              mcols(anchor2) <- NULL
+              
+              em <- DataFrame(counts = object@counts, object@elementMetadata)
+              
+              newobj <- GInteractions(anchor1, anchor2, 
+                                      all_anchors,
+                                      metadata = object@metadata,
+                                      elementMetadata = em)
+              
+              class(newobj) <- "GenomicInteractions"
+              names(mcols(newobj)) <- gsub("elementMetadata.", "", names(mcols(newobj)))
+              newobj
+            } else {
+              object
+            }
           })
