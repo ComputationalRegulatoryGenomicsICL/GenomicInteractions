@@ -56,7 +56,6 @@ setReplaceMethod("description", "GInteractions", function(object, value){
 })
 
 #' @rdname setters
-#' @import BiocGenerics
 #' @export
 setReplaceMethod("interactionCounts", "GInteractions", function(GIObject, value){
     if (!all(value == floor(value)))

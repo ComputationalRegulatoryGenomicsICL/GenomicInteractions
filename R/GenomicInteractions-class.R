@@ -152,6 +152,7 @@ setMethod("GenomicInteractions", c("ANY", "ANY", "ANY"),
 #' @inheritParams BiocGenerics::updateObject
 #' @return A GenomicInteractions object
 #' @importFrom Biobase updateObject
+#' @importFrom BiocGenerics getObjectSlots
 #' @export
 
 setMethod("updateObject", signature(object="GenomicInteractions"),
