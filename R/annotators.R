@@ -21,51 +21,6 @@ setMethod("resetAnnotations", c("GInteractions"), function(GIObject){
       return(invisible(1))
 })
 
-#' Annotate anchors - DEPRECATED
-#'
-#' This function is deprecated and will be removed in the next release of Bioconductor.
-#' Use `annotateRegions` instead.
-#'
-#' @param GIObject A GenomicInteractions object
-#' @param oneOrTwo An integer indicating which anchor to annotate
-#' @param name Character. Will be used as a column name for the elementMetadata 
-#' of the annotated anchor. 
-#' @param dat Vector of the same length as the GenomicInteractions object,
-#' containing data with which to annotate the object. 
-#' @return invisible(1)
-#' 
-#' @rdname annotateAnchors
-#' @docType methods
-#' @export
-#' 
-setGeneric("annotateAnchors",function(GIObject, oneOrTwo, name, dat){
-  standardGeneric ("annotateAnchors")})
-#' @rdname annotateAnchors
-#' @export
-setMethod("annotateAnchors", c("GenomicInteractions", "numeric", "character", "vector"), 
-            function(GIObject, oneOrTwo, name, dat){
-              .Deprecated("annotateRegions")
-              
-                # need to check the validity of the arguments
-                objName = deparse(substitute(GIObject))
-                elementMetadata(GIObject@regions)[[name]] <- NA
-                if(oneOrTwo == 1 ){
-                  if(length(dat) > length(GIObject@anchor1)){
-                    warning("Annotation data longer than anchors! Try `annotateRegions` instead.")
-                  }          
-                  elementMetadata(GIObject@regions)[[name]][GIObject@anchor1] <- dat
-                }else if(oneOrTwo == 2){
-                  if(length(dat) > length(GIObject@anchor2)){
-                    warning("Annotation data longer than anchors! Try `annotateRegions` instead.")
-                  } 
-                  elementMetadata(GIObject@regions)[[name]][GIObject@anchor2] <- dat
-                  }else{
-                    stop("anchor is neither 1 or 2")
-                  }
-                assign(objName, GIObject, envir = parent.frame())
-                return(invisible(1)) 
-          })
-
 #' Annotate regions
 #'
 #' Use this function to add metadata parallel to the `regions` slot of a 
