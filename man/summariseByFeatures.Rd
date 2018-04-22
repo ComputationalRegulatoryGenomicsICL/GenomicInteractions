@@ -43,4 +43,3 @@ data("mm9_refseq_promoters")
 annotateInteractions(hic_example_data, list(promoter = mm9_refseq_promoters))
 summariseByFeatures(hic_example_data, mm9_refseq_promoters[1:10], "promoter")
 }
-

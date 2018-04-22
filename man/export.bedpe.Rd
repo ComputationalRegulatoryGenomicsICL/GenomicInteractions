@@ -30,4 +30,3 @@ to populate the score field.
 data(hic_example_data)
 export.bedpe(hic_example_data, fn = tempfile(), score = "counts")
 }
-

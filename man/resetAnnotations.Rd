@@ -24,4 +24,3 @@ deleting  all of the metadata columns associated with both anchors.
 data(hic_example_data)
 resetAnnotations(hic_example_data)
 }
-

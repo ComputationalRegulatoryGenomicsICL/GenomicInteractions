@@ -10,4 +10,3 @@ GenomicInteractions: A package for analysing chromosome conformation
 \examples{
 library(GenomicInteractions)
 }
-

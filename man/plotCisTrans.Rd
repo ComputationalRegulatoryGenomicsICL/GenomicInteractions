@@ -19,4 +19,3 @@ Plots the percentages of cis and trans interactions for a GInteractions object a
 data(hic_example_data)
 plotCisTrans(hic_example_data)
 }
-

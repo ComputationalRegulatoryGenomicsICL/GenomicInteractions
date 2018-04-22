@@ -43,4 +43,3 @@ test <- GenomicInteractions(anchor.one, anchor.two, experiment_name="test",
 calculateDistances(test, method="midpoint")
         
 }
-

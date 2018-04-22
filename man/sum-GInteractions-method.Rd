@@ -16,4 +16,3 @@ The sum of the counts in GIObject
 \description{
 Return the total number of interactions in a GInteractions GIObject
 }
-

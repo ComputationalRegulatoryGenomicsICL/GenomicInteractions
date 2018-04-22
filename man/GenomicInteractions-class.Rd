@@ -30,4 +30,3 @@ interaction_counts = sample(1:10, 4)
 test <- GenomicInteractions(anchor.one, anchor.two, counts=interaction_counts)
 
 }
-

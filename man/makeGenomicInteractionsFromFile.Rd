@@ -42,4 +42,3 @@ k562.rep1 <- makeGenomicInteractionsFromFile(
 k562.rep1
 
 }
-

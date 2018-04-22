@@ -4,7 +4,7 @@
 \alias{get_self_ligation_threshold}
 \title{Get self ligation threshold with SD method from Heidari et al}
 \usage{
-get_self_ligation_threshold(GIObject, bins = 100, distance_th = 4e+05,
+get_self_ligation_threshold(GIObject, bins = 100, distance_th = 400000,
   plot = TRUE)
 }
 \arguments{
@@ -30,4 +30,3 @@ vs to the same strand is calculated. Twice the standard deviation of
 this ratio at high distances is used a cutoff to determine which bins 
 are likely to contain mostly self-liagted reads.
 }
-

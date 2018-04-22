@@ -2,18 +2,18 @@
 % Please edit documentation in R/getters.R
 \docType{methods}
 \name{getters}
-\alias{anchorOne}
-\alias{anchorOne,GInteractions-method}
-\alias{anchorTwo}
-\alias{anchorTwo,GInteractions-method}
-\alias{annotationFeatures}
-\alias{annotationFeatures,GInteractions-method}
-\alias{description,GInteractions-method}
 \alias{getters}
+\alias{anchorOne}
+\alias{anchorTwo}
 \alias{interactionCounts}
-\alias{interactionCounts,GInteractions-method}
-\alias{name}
+\alias{annotationFeatures}
 \alias{name,GInteractions-method}
+\alias{name}
+\alias{description,GInteractions-method}
+\alias{anchorOne,GInteractions-method}
+\alias{anchorTwo,GInteractions-method}
+\alias{interactionCounts,GInteractions-method}
+\alias{annotationFeatures,GInteractions-method}
 \title{Functions to access data held in a GenomicInteractions object.}
 \usage{
 name(GIObject)
@@ -70,4 +70,3 @@ anchorTwo(test)
 interactionCounts(test)
 
 }
-

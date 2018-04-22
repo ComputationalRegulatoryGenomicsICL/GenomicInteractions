@@ -20,4 +20,3 @@ for more details. (\code{vignettes(GenomicInteractions)}).
 Shen, Y et al. A map of cis-regulatory sequences in the mouse genome. Nature (2012).
 }
 \keyword{datasets}
-

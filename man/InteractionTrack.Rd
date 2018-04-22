@@ -37,4 +37,3 @@ interactions.track = InteractionTrack(name="Test", test, chromosome="chr1")
 plotTracks(list(interactions.track), chromosome="chr1", from=0, to=500)
 
 }
-

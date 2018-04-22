@@ -35,4 +35,3 @@ Export interactions in BED12 format.
 data(hic_example_data)
 export.bed12(hic_example_data, fn = tempfile(), score = "counts")
 }
-

@@ -35,4 +35,3 @@ vp <- viewPoint(hic_example_data, pos, region)
 plotViewpoint(vp, region)
 
 }
-

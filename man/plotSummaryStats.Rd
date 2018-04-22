@@ -26,4 +26,3 @@ and `plotInteractionAnnotations`.
 data(hic_example_data)
 plotSummaryStats(hic_example_data)
 }
-

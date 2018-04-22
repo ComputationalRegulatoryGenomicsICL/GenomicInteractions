@@ -30,4 +30,3 @@ data(hic_example_data)
 chip <- runif(n = length(regions(hic_example_data)), max = 1000)
 annotateRegions(hic_example_data, "chip", chip)
 }
-

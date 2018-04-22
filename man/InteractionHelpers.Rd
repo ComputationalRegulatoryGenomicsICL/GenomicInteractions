@@ -2,25 +2,25 @@
 % Please edit documentation in R/helpers.R
 \docType{methods}
 \name{is.pp}
-\alias{InteractionHelpers}
-\alias{is.cis}
-\alias{is.cis,GInteractions-method}
-\alias{is.dd}
-\alias{is.dd,GInteractions-method}
-\alias{is.dt}
-\alias{is.dt,GInteractions-method}
-\alias{is.pd}
-\alias{is.pd,GInteractions-method}
 \alias{is.pp}
-\alias{is.pp,GInteractions-method}
+\alias{is.pd}
 \alias{is.pt}
-\alias{is.pt,GInteractions-method}
-\alias{is.trans}
-\alias{is.trans,GInteractions-method}
+\alias{is.dd}
+\alias{is.dt}
 \alias{is.tt}
-\alias{is.tt,GInteractions-method}
 \alias{isInteractionType}
+\alias{is.trans}
+\alias{is.cis}
+\alias{InteractionHelpers}
+\alias{is.pp,GInteractions-method}
+\alias{is.pd,GInteractions-method}
+\alias{is.pt,GInteractions-method}
+\alias{is.dd,GInteractions-method}
+\alias{is.dt,GInteractions-method}
+\alias{is.tt,GInteractions-method}
 \alias{isInteractionType,GInteractions-method}
+\alias{is.trans,GInteractions-method}
+\alias{is.cis,GInteractions-method}
 \title{Interaction Type Helpers}
 \usage{
 is.pp(GIObject)
@@ -85,4 +85,3 @@ table(is.cis(hic_example_data))
 sum(interactionCounts(hic_example_data))
 
 }
-

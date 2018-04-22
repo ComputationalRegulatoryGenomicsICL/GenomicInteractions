@@ -24,4 +24,3 @@ data(hic_example_data)
 plotCounts(hic_example_data)
 plotCounts(hic_example_data, normalise=TRUE)
 }
-

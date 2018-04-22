@@ -18,4 +18,3 @@ for mouse genome build mm9. See the HiC analysis vignette
 dataset was created.
 }
 \keyword{datasets}
-

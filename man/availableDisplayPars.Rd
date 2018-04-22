@@ -24,4 +24,3 @@ The default display parameters for a track object class can be queries using the
 availableDisplayPars("InteractionTrack")
 
 }
-

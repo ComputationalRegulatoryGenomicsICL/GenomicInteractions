@@ -39,4 +39,3 @@ conventions, i.e., with columns for blocks and thick regions.
 data(hic_example_data)
 asBED(hic_example_data)
 }
-

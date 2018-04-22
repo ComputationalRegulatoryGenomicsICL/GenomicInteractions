@@ -41,4 +41,3 @@ annotateInteractions(hic_example_data, list(promoter = mm9_refseq_promoters))
 ids <- names(mm9_refseq_promoters[1:10])
 subsetByFeatures(hic_example_data, ids, "promoter")
 }
-

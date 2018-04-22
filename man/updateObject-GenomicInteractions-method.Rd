@@ -33,4 +33,3 @@ A GenomicInteractions object
 \description{
 updateObject method for GenomicInteractions 1.3.7 and earlier
 }
-

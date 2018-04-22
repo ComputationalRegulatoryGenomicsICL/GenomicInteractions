@@ -30,4 +30,3 @@ invisible(1)
 This function is deprecated and will be removed in the next release of Bioconductor.
 Use `annotateRegions` instead.
 }
-

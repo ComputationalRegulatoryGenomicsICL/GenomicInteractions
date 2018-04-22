@@ -36,4 +36,3 @@ vs to the same strand is calculated. A binomial test is used to test
 if this is significantly different from the 50:50 ratio expected by 
 chance if all reads are real interactions.
 }
-

@@ -18,4 +18,3 @@ for mouse genome build hg19 See the ChIA-PET analysis vignette
 dataset was created.
 }
 \keyword{datasets}
-

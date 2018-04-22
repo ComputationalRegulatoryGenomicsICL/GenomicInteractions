@@ -2,12 +2,12 @@
 % Please edit documentation in R/setters.R
 \docType{methods}
 \name{setters}
-\alias{description<-,GInteractions,ANY-method}
-\alias{interactionCounts<-}
-\alias{interactionCounts<-,GInteractions-method}
-\alias{name<-}
-\alias{name<-,GInteractions-method}
 \alias{setters}
+\alias{name<-}
+\alias{interactionCounts<-}
+\alias{name<-,GInteractions-method}
+\alias{description<-,GInteractions,ANY-method}
+\alias{interactionCounts<-,GInteractions-method}
 \title{Functions to set data held in a GInteractions object.}
 \usage{
 name(GIObject) <- value
@@ -54,4 +54,3 @@ interactionCounts(test) <- c(2,3,8,5)
 interactionCounts(test)
 
 }
-

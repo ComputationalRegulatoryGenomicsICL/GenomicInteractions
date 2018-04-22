@@ -18,4 +18,3 @@ having identical coordinates for both anchors). N.B. this does not summarise
 the total counts of all the duplicates. It is designed for removing potential
 PCR duplicates after reading in .bam files.
 }
-

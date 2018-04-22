@@ -28,4 +28,3 @@ data(hic_example_data)
 ig <- export.igraph(hic_example_data)
 
 }
-

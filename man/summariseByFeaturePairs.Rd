@@ -46,4 +46,3 @@ e <- e[!is.na(e)]
 e <- thymus_enh[e]
 ep_summary <- summariseByFeaturePairs(hic_example_data, p, "promoter", e, "enhancer")
 }
-

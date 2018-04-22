@@ -28,4 +28,3 @@ A GInteractions object with annotated counts between anchors
 Calculate the number of of paired-end reads mapping between a defined set of anchors.
 This function will ignore counts present in the input data.
 }
-

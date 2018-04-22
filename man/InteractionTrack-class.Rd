@@ -32,4 +32,3 @@ of interaction they are involved in (i.e. promoter-promoter interactions etc) by
 display parameter to be a named vector of colours, where the name corresponds to the type of interaction. This is applicable to
 anchors regions through the use of the \code{col.anchors.line.node.class} and \code{col.anchors.fill.node.class} parameters.
 }
-

@@ -16,4 +16,3 @@ A logical vector denoting with TRUE if both anchors of an interaction
 \description{
 This is designed for processing .bam files.
 }
-
