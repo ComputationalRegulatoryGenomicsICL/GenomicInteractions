@@ -32,7 +32,7 @@ test_that("bed12 export/import is consistent", {
 
 test_that("bed12 export/import via rtracklayer is consistent", {
   tmp <- tempfile()
-  export(asBED(gi), tmp, format="bed")
+  rtracklayer::export(asBED(gi), tmp, format="bed")
   #attributes dropped on export
   expect_equivalent(sort(asBED(gi)), #bed12 cannot store strand so is dropped
                sort(rtracklayer::import(tmp, format="bed")))

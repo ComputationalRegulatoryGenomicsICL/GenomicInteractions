@@ -186,6 +186,7 @@ setMethod("export.chiasig", c("GInteractions"), function(GIObject, fn=NULL, scor
 #' @importFrom rtracklayer asBED
 #' @importFrom IRanges PartitioningByWidth
 #' @importFrom S4Vectors elementNROWS
+#' @importFrom BiocGenerics relist
 #' @export
 #' @docType methods
 #' @examples
