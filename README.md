@@ -7,8 +7,9 @@
 To install this package, start R and enter:
 
 ```
-source("http://bioconductor.org/biocLite.R")
-biocLite("GenomicInteractions")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GenomicInteractions")
 ```
 
 To install the latest version from this repository using the devtools package:
