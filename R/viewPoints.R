@@ -45,7 +45,7 @@ viewPoint = function(x, bait, region=NULL, ...) {
                              counts = c(interactionCounts(x)[queryHits(hits$one)], 
                                       interactionCounts(x)[queryHits(hits$two)]))
   if (!is.null(region)) { 
-    vp <- x[overlapsAny(anchorTwo(x), region, ...)] 
+    vp <- vp[overlapsAny(anchorTwo(vp), region, ...)] 
     }
   ord = order(vp)
   return(vp[ord])
