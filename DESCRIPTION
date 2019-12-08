@@ -1,9 +1,9 @@
 Package: GenomicInteractions
 Type: Package
-Title: R package for handling genomic interaction data
+Title: Utilities for handling genomic interaction data
 URL: https://github.com/ComputationalRegulatoryGenomicsICL/GenomicInteractions/
-Version: 1.19.1
-Date: 2019-08-04
+Version: 1.19.2
+Date: 2019-12-07
 Author: Harmston, N., Ing-Simmons, E., Perry, M., Baresic, A., Lenhard,
     B.
 Maintainer: Liz Ing-Simmons <liz.ingsimmons@gmail.com>
@@ -34,9 +34,9 @@ Suggests:
     BiocStyle,
     testthat
 VignetteBuilder: knitr
-Description: R package for handling Genomic interaction data, such as
-    ChIA-PET/Hi-C, annotating genomic features with interaction
-    information and producing various plots / statistics.
+Description: Utilities for handling genomic interaction data such as
+    ChIA-PET or Hi-C, annotating genomic features with interaction
+    information, and producing plots and summary statistics.
 biocViews: Software,Infrastructure,DataImport,DataRepresentation,HiC
 License: GPL-3
 Depends:

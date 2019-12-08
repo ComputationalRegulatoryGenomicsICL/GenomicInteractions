@@ -1,0 +1,15 @@
+citEntry(entry="article",
+         title = "GenomicInteractions: An R/Bioconductor package for manipulating and investigating chromatin interaction data",
+         author = personList( 
+          as.person("Nathan Harmston" ),
+           as.person("Elizabeth Ing-Simmons" ),
+           as.person("Malcolm Perry" ),
+           as.person("Anja Bare{\v{s}}i{\'{c}}" ),
+           as.person("Boris Lenhard" )),
+         year = 2015,
+         journal = "BMC Genomics",
+         volume = "16",
+         issue = "963",
+         doi = "10.1186/s12864-015-2140-x",
+         url = "https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-2140-x",
+         textVersion = "Harmston, N., Ing-Simmons, E., Perry, M., Baresic, A. and Lenhard, B. (2015). GenomicInteractions: An R/Bioconductor package for manipulating and investigating chromatin interaction data. BMC Genomics 16:963.")
