@@ -4,9 +4,15 @@
 \alias{plotAvgViewpoint}
 \title{Plot coverage around a set of virtual 4C viewpoints}
 \usage{
-plotAvgViewpoint(x, left_dist = 100000, right_dist = 100000,
-  ylab = "Average signal", xlab = "Relative position", fix = "center",
-  ...)
+plotAvgViewpoint(
+  x,
+  left_dist = 1e+05,
+  right_dist = 1e+05,
+  ylab = "Average signal",
+  xlab = "Relative position",
+  fix = "center",
+  ...
+)
 }
 \arguments{
 \item{x}{A GInteractions object which is output from viewPoint}

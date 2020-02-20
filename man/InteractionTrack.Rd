@@ -4,8 +4,7 @@
 \alias{InteractionTrack}
 \title{Constructor to create an InteractionTrack object}
 \usage{
-InteractionTrack(x, chromosome = "", name = NULL, start = NULL,
-  end = NULL)
+InteractionTrack(x, chromosome = "", name = NULL, start = NULL, end = NULL)
 }
 \arguments{
 \item{x}{A GenomicInteractions object}

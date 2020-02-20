@@ -4,8 +4,14 @@
 \alias{plotInteractionAnnotations}
 \title{Plot a donut plot of interaction types for an annotated GInteractions object}
 \usage{
-plotInteractionAnnotations(GIObject, node.classes = NULL, viewpoints = NULL,
-  other = 0, keep.order = FALSE, legend = FALSE)
+plotInteractionAnnotations(
+  GIObject,
+  node.classes = NULL,
+  viewpoints = NULL,
+  other = 0,
+  keep.order = FALSE,
+  legend = FALSE
+)
 }
 \arguments{
 \item{GIObject}{A GInteractions object}

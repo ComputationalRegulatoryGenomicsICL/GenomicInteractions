@@ -4,8 +4,12 @@
 \alias{get_self_ligation_threshold}
 \title{Get self ligation threshold with SD method from Heidari et al}
 \usage{
-get_self_ligation_threshold(GIObject, bins = 100, distance_th = 400000,
-  plot = TRUE)
+get_self_ligation_threshold(
+  GIObject,
+  bins = 100,
+  distance_th = 4e+05,
+  plot = TRUE
+)
 }
 \arguments{
 \item{GIObject}{a GInteractions object of paired end reads}

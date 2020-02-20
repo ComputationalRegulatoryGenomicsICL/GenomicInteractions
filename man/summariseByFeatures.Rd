@@ -6,11 +6,21 @@
 \alias{summariseByFeatures,GInteractions-method}
 \title{Summary statistics of interactions for a given feature set}
 \usage{
-summariseByFeatures(GIObject, features, feature.name,
-  distance.method = "midpoint", annotate.self = FALSE)
+summariseByFeatures(
+  GIObject,
+  features,
+  feature.name,
+  distance.method = "midpoint",
+  annotate.self = FALSE
+)
 
-\S4method{summariseByFeatures}{GInteractions}(GIObject, features, feature.name,
-  distance.method = "midpoint", annotate.self = FALSE)
+\S4method{summariseByFeatures}{GInteractions}(
+  GIObject,
+  features,
+  feature.name,
+  distance.method = "midpoint",
+  annotate.self = FALSE
+)
 }
 \arguments{
 \item{GIObject}{An annotated GInteractions object}

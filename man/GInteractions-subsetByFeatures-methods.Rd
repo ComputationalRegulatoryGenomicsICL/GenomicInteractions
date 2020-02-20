@@ -10,14 +10,11 @@
 \usage{
 subsetByFeatures(GIObject, features, feature.class = NULL)
 
-\S4method{subsetByFeatures}{GInteractions,GRanges,missing}(GIObject, features,
-  feature.class = NULL)
+\S4method{subsetByFeatures}{GInteractions,GRanges,missing}(GIObject, features, feature.class = NULL)
 
-\S4method{subsetByFeatures}{GInteractions,GRangesList,missing}(GIObject,
-  features, feature.class = NULL)
+\S4method{subsetByFeatures}{GInteractions,GRangesList,missing}(GIObject, features, feature.class = NULL)
 
-\S4method{subsetByFeatures}{GInteractions,character,character}(GIObject,
-  features, feature.class = NULL)
+\S4method{subsetByFeatures}{GInteractions,character,character}(GIObject, features, feature.class = NULL)
 }
 \arguments{
 \item{GIObject}{A GInteractions object}

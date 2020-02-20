@@ -4,8 +4,11 @@
 \alias{plotDists}
 \title{Plots a histogram of interaction distances for a GInteractions Object}
 \usage{
-plotDists(GIObject, breaks = c(0, 1000, 5000, 10000, 50000, 100000, 500000,
-  1000000, 2000000), method = "midpoint")
+plotDists(
+  GIObject,
+  breaks = c(0, 1000, 5000, 10000, 50000, 1e+05, 5e+05, 1e+06, 2e+06),
+  method = "midpoint"
+)
 }
 \arguments{
 \item{GIObject}{A GInteractions object}
