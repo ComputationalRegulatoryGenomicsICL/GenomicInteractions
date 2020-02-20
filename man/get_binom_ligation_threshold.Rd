@@ -4,8 +4,14 @@
 \alias{get_binom_ligation_threshold}
 \title{get self ligation threshold with binomial test}
 \usage{
-get_binom_ligation_threshold(GIObject, max.distance = 20000, bin.size = 500,
-  p.cutoff = 0.05, adjust = "fdr", plot = TRUE)
+get_binom_ligation_threshold(
+  GIObject,
+  max.distance = 20000,
+  bin.size = 500,
+  p.cutoff = 0.05,
+  adjust = "fdr",
+  plot = TRUE
+)
 }
 \arguments{
 \item{GIObject}{a GInteractions object of paired end reads}

@@ -4,8 +4,13 @@
 \alias{makeGenomicInteractionsFromFile}
 \title{Function to create GenomicInteraction objects from a file}
 \usage{
-makeGenomicInteractionsFromFile(fn, type, experiment_name = "",
-  description = "", chr_names = NULL)
+makeGenomicInteractionsFromFile(
+  fn,
+  type,
+  experiment_name = "",
+  description = "",
+  chr_names = NULL
+)
 }
 \arguments{
 \item{fn}{Filename or, if type="hiclib", folder}

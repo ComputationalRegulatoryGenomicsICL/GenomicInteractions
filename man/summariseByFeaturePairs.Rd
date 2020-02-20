@@ -6,11 +6,21 @@
 \alias{summariseByFeaturePairs,GInteractions-method}
 \title{Summarise the number of interactions between two sets of features.}
 \usage{
-summariseByFeaturePairs(GIObject, features.one, feature.name.one, features.two,
-  feature.name.two)
+summariseByFeaturePairs(
+  GIObject,
+  features.one,
+  feature.name.one,
+  features.two,
+  feature.name.two
+)
 
-\S4method{summariseByFeaturePairs}{GInteractions}(GIObject, features.one,
-  feature.name.one, features.two, feature.name.two)
+\S4method{summariseByFeaturePairs}{GInteractions}(
+  GIObject,
+  features.one,
+  feature.name.one,
+  features.two,
+  feature.name.two
+)
 }
 \arguments{
 \item{GIObject}{An annotated GInteractions object}

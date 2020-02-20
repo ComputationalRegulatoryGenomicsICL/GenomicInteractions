@@ -8,8 +8,7 @@
 \usage{
 export.bed12(GIObject, fn = NULL, score = "counts")
 
-\S4method{export.bed12}{GInteractions}(GIObject, fn = NULL,
-  score = "counts")
+\S4method{export.bed12}{GInteractions}(GIObject, fn = NULL, score = "counts")
 }
 \arguments{
 \item{GIObject}{A GInteractions object.}

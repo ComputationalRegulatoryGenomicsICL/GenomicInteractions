@@ -8,8 +8,7 @@
 \usage{
 countsBetweenAnchors(x, y, ...)
 
-\S4method{countsBetweenAnchors}{GInteractions,GRanges}(x, y,
-  ignore_overlaps = FALSE, ...)
+\S4method{countsBetweenAnchors}{GInteractions,GRanges}(x, y, ignore_overlaps = FALSE, ...)
 }
 \arguments{
 \item{x}{A GInteractions object}

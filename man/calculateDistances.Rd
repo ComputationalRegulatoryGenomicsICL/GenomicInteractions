@@ -8,8 +8,7 @@
 \usage{
 calculateDistances(GIObject, method = "midpoint", floor = TRUE)
 
-\S4method{calculateDistances}{GInteractions}(GIObject, method = "midpoint",
-  floor = TRUE)
+\S4method{calculateDistances}{GInteractions}(GIObject, method = "midpoint", floor = TRUE)
 }
 \arguments{
 \item{GIObject}{A GInteractions object}

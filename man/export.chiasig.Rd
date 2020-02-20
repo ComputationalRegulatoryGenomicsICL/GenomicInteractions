@@ -8,8 +8,7 @@
 \usage{
 export.chiasig(GIObject, fn = NULL, score = "counts")
 
-\S4method{export.chiasig}{GInteractions}(GIObject, fn = NULL,
-  score = "counts")
+\S4method{export.chiasig}{GInteractions}(GIObject, fn = NULL, score = "counts")
 }
 \arguments{
 \item{GIObject}{A GInteractions object.}
