@@ -36,7 +36,7 @@ from standard processing pipelines, such as HOMER and ChIA-PET tool. GenomicInte
 using calls of the form \code{new("GenomicInteractions", ...)}. For hiclib, it expects the directory in which the files
 extracted using h5dictToTxt.py from the hdf5 file are located, where as for all of the other file types it expects the full
 filename. Note that recent versions of hiclib (2015-) cannot export the required data and so this function will only work with
-older files.
+older files. Hiclib support will be removed in the next version of GenomicInteractions.
 }
 \examples{
 

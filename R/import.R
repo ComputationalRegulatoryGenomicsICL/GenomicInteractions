@@ -9,7 +9,7 @@
 #' using calls of the form \code{new("GenomicInteractions", ...)}. For hiclib, it expects the directory in which the files
 #' extracted using h5dictToTxt.py from the hdf5 file are located, where as for all of the other file types it expects the full
 #' filename. Note that recent versions of hiclib (2015-) cannot export the required data and so this function will only work with
-#' older files.
+#' older files. Hiclib support will be removed in the next version of GenomicInteractions.
 #'
 #' @param fn Filename or, if type="hiclib", folder
 #' @param type One of "chiapet.tool", "bed12", "bedpe", "hiclib", "homer", "bam", "two.bams".
@@ -21,6 +21,7 @@
 #' @importFrom Rsamtools scanBamFlag ScanBamParam scanBam bamFlagAsBitMatrix
 #' @importFrom IRanges IRanges
 #' @importFrom data.table data.table fread .N
+#' @importFrom S4Vectors first second
 #'
 #' @examples
 #'
@@ -57,33 +58,21 @@ makeGenomicInteractionsFromFile = function(fn, type, experiment_name="", descrip
         counts = as.integer(dat[,"counts"])
 
     } else if (type == "bedpe") {
-        dat = read.table(fn, stringsAsFactors=FALSE, sep="\t")
-        if (!all(vapply(dat[,c(2,3,5,6,8)], is.numeric, logical(1))) ||
-            !all(vapply(dat[,c(1,4)], is.character, logical(1)))) {
-            stop(paste("bedpe file does not appear to be in the correct format. See",
-                       "http://bedtools.readthedocs.org/en/latest/content/general-usage.html",
-                       "for details"))
-        }
-
-        if (ncol(dat) >= 10) {
-            if (!all(vapply(dat[,c(9,10)], is.character, logical(1)))) {
-                stop(paste("bedpe file does not appear to be in the correct format. See",
-                           "http://bedtools.readthedocs.org/en/latest/content/general-usage.html",
-                           "for details"))
-            }
-            strand1 = dat[,9]
-            strand2 = dat[,10]
+        dat <- rtracklayer::import(fn, format = "bedpe")
+        anchor_one <- first(dat)
+        anchor_two <- second(dat)
+        if ("score" %in% names(mcols(dat))){
+          counts <- mcols(dat)$score
         } else {
-            strand1 = "*"
-            strand2 = "*"
+          message("No 'score' column found; setting counts to 1.")
+          counts <- rep(1, length(anchor_one))
         }
+        em <- mcols(dat)[, names(mcols(dat))!="score", drop = FALSE]
 
-        anchor_one = GRanges(dat[,1], IRanges(dat[,2]+1, dat[,3]), strand=strand1)
-        anchor_two = GRanges(dat[,4], IRanges(dat[,5]+1, dat[,6]), strand=strand2)
-        counts = as.integer(dat[,8])
         if (any(counts == 0)) warning("Some counts are set to zero, bedpe score field may represent other data")
 
     } else if (type == "hiclib") {
+      warning("hiclib support is deprecated and will be removed in the next version of GenomicInteractions.")
 	    dat = .importHicLib(fn, chr_names)
 	    .validateInput(dat, c("chrm1", "fraglength1", "mid1", "fragid1", "chrm2", "fraglength2",
 	                          "mid2", "fragid2", "N"))

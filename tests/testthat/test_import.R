@@ -42,10 +42,11 @@ test_that("bed12 export/import via rtracklayer is consistent", {
 test_that("bedpe export/import is consistent", {
   tmp <- tempfile()
   export.bedpe(gi, fn = tmp)
-  #attributes dropped on export
-  expect_equivalent(sort(gi), sort(makeGenomicInteractionsFromFile(tmp, type = "bedpe")))
+  #attributes dropped on export, name column added
+  with_name <- gi
+  mcols(with_name)$name <- paste0("interaction:", seq_along(gi))
+  expect_equivalent(sort(with_name), sort(makeGenomicInteractionsFromFile(tmp, type = "bedpe")))
   unlink(tmp)
-  #fails, anchor strands don't match after import!
 })
 
 
