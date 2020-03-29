@@ -2,7 +2,7 @@ Package: GenomicInteractions
 Type: Package
 Title: R package for handling genomic interaction data
 URL: https://github.com/ComputationalRegulatoryGenomicsICL/GenomicInteractions/
-Version: 1.20.1
+Version: 1.20.2
 Date: 2019-08-04
 Author: Harmston, N., Ing-Simmons, E., Perry, M., Baresic, A., Lenhard,
     B.
@@ -42,4 +42,4 @@ License: GPL-3
 Depends:
     R (>= 3.5),
     InteractionSet
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0

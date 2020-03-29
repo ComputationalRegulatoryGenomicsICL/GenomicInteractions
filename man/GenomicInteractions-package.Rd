@@ -4,9 +4,6 @@
 \name{GenomicInteractions-package}
 \alias{GenomicInteractions-package}
 \title{GenomicInteractions: A package for analysing chromosome conformation}
-\description{
-GenomicInteractions: A package for analysing chromosome conformation
-}
 \examples{
 library(GenomicInteractions)
 }

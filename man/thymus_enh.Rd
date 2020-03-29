@@ -4,7 +4,9 @@
 \name{thymus_enh}
 \alias{thymus_enh}
 \title{Putative enhancers from mouse thymus data}
-\format{A GRanges object}
+\format{
+A GRanges object
+}
 \usage{
 data("thymus_enhancers")
 }
