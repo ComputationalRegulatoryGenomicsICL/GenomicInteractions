@@ -4,7 +4,11 @@
 \name{mm9_refseq_promoters}
 \alias{mm9_refseq_promoters}
 \title{Mouse Refseq promoters from chr 14-15}
-\format{A GRanges object with length 2441.}
+\format{
+A GRanges object with length 2441.
+
+A GRanges object
+}
 \usage{
 data(mm9_refseq_promoters)
 }

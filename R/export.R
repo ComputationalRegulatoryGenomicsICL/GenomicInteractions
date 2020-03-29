@@ -170,15 +170,8 @@ setMethod("export.chiasig", c("GInteractions"), function(GIObject, fn=NULL, scor
 #'              Defaults to "auto" which will choose score, then counts,
 #'              if present, or fill column with zeros.
 #'
-#' @param ... Arguments to pass to methods
-#'
-#'      The exact behavior depends on the class of `object`.
-#'
-#'      `GRangesList` This treats `object` as if it were a list of
-#'           transcripts, i.e., each element contains the exons of a
-#'           transcript. The `blockStarts` and `blockSizes` columns are
-#'           derived from the ranges in each element. Also, add `name`
-#'           column from `names(object)`.
+#' @param ... Arguments to pass to methods, see \code{\link[rtracklayer]{asBED}}
+#' for details.
 #'
 #' @return A `GRanges`, with the metadata columns `name`, `blockStarts` and
 #'         `blockSizes` added.
@@ -193,7 +186,7 @@ setMethod("export.chiasig", c("GInteractions"), function(GIObject, fn=NULL, scor
 #' data(hic_example_data)
 #' asBED(hic_example_data)
 setMethod("asBED", c("GInteractions"),
-    function(x, keep.mcols=FALSE, score="score") {
+    function(x, keep.mcols=FALSE, score="score", ...) {
         if (!is.null(names(x)) || !is.null(x$name))
             warning("Names will be dropped during BED12 export")
 

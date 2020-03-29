@@ -4,7 +4,9 @@
 \name{hic_example_data}
 \alias{hic_example_data}
 \title{Example HiC dataset}
-\format{A GenomicInteractions object with length 8171.}
+\format{
+A GenomicInteractions object with length 8171.
+}
 \usage{
 data(hic_example_data)
 }

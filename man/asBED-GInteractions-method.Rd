@@ -5,7 +5,7 @@
 \alias{asBED,GInteractions-method}
 \title{Coerce to BED structure}
 \usage{
-\S4method{asBED}{GInteractions}(x, keep.mcols = FALSE, score = "score")
+\S4method{asBED}{GInteractions}(x, keep.mcols = FALSE, score = "score", ...)
 }
 \arguments{
 \item{x}{Generally, a tabular object to structure as BED}
@@ -17,15 +17,8 @@ output (may cause problems with some parsers).}
 Defaults to "auto" which will choose score, then counts,
 if present, or fill column with zeros.}
 
-\item{...}{Arguments to pass to methods
-
-     The exact behavior depends on the class of `object`.
-
-     `GRangesList` This treats `object` as if it were a list of
-          transcripts, i.e., each element contains the exons of a
-          transcript. The `blockStarts` and `blockSizes` columns are
-          derived from the ranges in each element. Also, add `name`
-          column from `names(object)`.}
+\item{...}{Arguments to pass to methods, see \code{\link[rtracklayer]{asBED}}
+for details.}
 }
 \value{
 A `GRanges`, with the metadata columns `name`, `blockStarts` and

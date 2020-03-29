@@ -4,7 +4,11 @@
 \name{hg19.refseq.transcripts}
 \alias{hg19.refseq.transcripts}
 \title{Human Refseq transcripts from chr 17-18}
-\format{A GRanges object with length 2441.}
+\format{
+A GRanges object with length 2441.
+
+A GRanges object
+}
 \usage{
 data(hg19.refseq.transcripts)
 }
