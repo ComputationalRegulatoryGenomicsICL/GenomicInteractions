@@ -48,7 +48,7 @@ viewPoint = function(x, bait, region=NULL, ...) {
     vp <- vp[overlapsAny(anchorTwo(vp), region, ...)] 
     }
   ord = order(vp)
-  return(vp[ord])
+  return(unique(vp[ord]))
 }
 
 #' Plot coverage around a virtual 4C viewpoint
