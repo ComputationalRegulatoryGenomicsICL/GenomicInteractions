@@ -6,32 +6,43 @@
 \alias{annotateInteractions,GInteractions,list-method}
 \title{Annotate the interactions in a GInteractions object}
 \usage{
-annotateInteractions(GIObject, annotations)
+annotateInteractions(GIObject, annotations, id.col = NULL)
 
-\S4method{annotateInteractions}{GInteractions,list}(GIObject, annotations)
+\S4method{annotateInteractions}{GInteractions,list}(GIObject, annotations, id.col = NULL)
 }
 \arguments{
 \item{GIObject}{A GInteractions object to be annotated}
 
-\item{annotations}{A list containing GRanges (or GRangesList) objects with which to annotate
-the GInteractions object.}
+\item{annotations}{A list containing GRanges (or GRangesList) objects with
+which to annotate the GInteractions object.}
+
+\item{id.col}{}
 }
 \value{
 invisible(1)
 }
 \description{
-This function will annotate both anchors with a list of named GRanges
-objects. Each metadata column is labeled "name.id" and contains the id of
-the genomic interval(s) it overlaps. Anonymous lists will be given names
-"FEATURE#.id" where # is the position in the list.
+This function annotates the regions of a GInteractions object according to
+their overlaps with `annotations`, a list of named GRanges (or GRangesList)
+objects.
 }
 \details{
+Metadata columns will be added to the regions of the GInteractions object,
+named according to the names of `annotations` and containing the id(s) of the
+corresponding overlapping genomic interval(s). If `annotations` is not named,
+the metadata columns will be named "FEATURE#.id" where # is the position in
+the list.
+
+IDs for features in each element of annotations will be extracted according
+to the following rules: if the annotation features are a GRanges object and a
+metadata column is specified using `id.col`, this column will be used as
+feature IDs. Otherwise, if the annotation features are named, their names
+will be used. If neither of these are present, they will be given numeric
+IDs.
+
 For each anchor a "node.class" metadata column will also be added, containing
 the name of the list element which was \emph{first} annotated to each range.
-Ranges with no overlaps will be classified as "distal". The identifiers for each 
-individual feature/annotation are taken from either the name of the list item in the 
-case of a GRangesList or from either the names of a the provided GRanges or an id column 
-in its associated metadata.
+Ranges with no overlaps will be classified as "distal".
 }
 \examples{
 
@@ -39,5 +50,7 @@ library("GenomicRanges")
 data(hic_example_data)
 data(mm9_refseq_promoters)
 mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)
+# This adds a `promoter.id` metadata column to regions(hic_example_data)
+# containing IDs of overlapping promoters for each region, taken from names(mm9_refseq_grl)
 annotateInteractions(hic_example_data, list(promoter=mm9_refseq_grl))
 }

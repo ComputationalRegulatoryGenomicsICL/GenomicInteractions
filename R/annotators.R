@@ -53,21 +53,31 @@ setMethod("annotateRegions", c("GInteractions", "character", "vector"),
 
 #' Annotate the interactions in a GInteractions object
 #'
-#' This function will annotate both anchors with a list of named GRanges
-#' objects. Each metadata column is labeled "name.id" and contains the id of
-#' the genomic interval(s) it overlaps. Anonymous lists will be given names
-#' "FEATURE#.id" where # is the position in the list.
+#' This function annotates the regions of a GInteractions object according to
+#' their overlaps with `annotations`, a list of named GRanges (or GRangesList)
+#' objects.
+#'
+#' Metadata columns will be added to the regions of the GInteractions object,
+#' named according to the names of `annotations` and containing the id(s) of the
+#' corresponding overlapping genomic interval(s). If `annotations` is not named,
+#' the metadata columns will be named "FEATURE#.id" where # is the position in
+#' the list.
+#'
+#' IDs for features in each element of annotations will be extracted according
+#' to the following rules: if the annotation features are a GRanges object and a
+#' metadata column is specified using `id.col`, this column will be used as
+#' feature IDs. Otherwise, if the annotation features are named, their names
+#' will be used. If neither of these are present, they will be given numeric
+#' IDs.
 #'
 #' For each anchor a "node.class" metadata column will also be added, containing
 #' the name of the list element which was \emph{first} annotated to each range.
-#' Ranges with no overlaps will be classified as "distal". The identifiers for each 
-#' individual feature/annotation are taken from either the name of the list item in the 
-#' case of a GRangesList or from either the names of a the provided GRanges or an id column 
-#' in its associated metadata.
-#'
+#' Ranges with no overlaps will be classified as "distal".
+#' 
 #' @param GIObject A GInteractions object to be annotated
-#' @param annotations A list containing GRanges (or GRangesList) objects with which to annotate
-#'             the GInteractions object.
+#' @param annotations A list containing GRanges (or GRangesList) objects with
+#'   which to annotate the GInteractions object.
+#' @param id.col 
 #' @return invisible(1)
 #' @rdname annotateInteractions
 #' @docType methods
@@ -79,57 +89,74 @@ setMethod("annotateRegions", c("GInteractions", "character", "vector"),
 #' data(hic_example_data)
 #' data(mm9_refseq_promoters)
 #' mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)
+#' # This adds a `promoter.id` metadata column to regions(hic_example_data)
+#' # containing IDs of overlapping promoters for each region, taken from names(mm9_refseq_grl)
 #' annotateInteractions(hic_example_data, list(promoter=mm9_refseq_grl))
-setGeneric("annotateInteractions",function(GIObject, annotations){standardGeneric ("annotateInteractions")})
+setGeneric("annotateInteractions",function(GIObject, annotations, id.col = NULL){standardGeneric ("annotateInteractions")})
 #' @rdname annotateInteractions
 #' @export
 #' @importFrom S4Vectors queryHits subjectHits
-setMethod("annotateInteractions", c("GInteractions", "list"), 
-            function(GIObject, annotations){
-                objName = deparse(substitute(GIObject))
-                mcols.reg <- mcols(GIObject@regions)
-                mcols.reg$node.class <- NA
-                if (is.null(names(annotations))){
-                  names(annotations) <- paste0("FEATURE", 1:length(annotations))
-                }
+setMethod("annotateInteractions", c("GInteractions", "list"),
+          function(GIObject, annotations, id.col = NULL) {
+            objName <- deparse(substitute(GIObject))
+            mcols.reg <- mcols(GIObject@regions)
+            mcols.reg$node.class <- NA
+            if (is.null(names(annotations))) {
+              names(annotations) <- paste0("FEATURE", 1:length(annotations))
+            }
+            
+            feature_names_list <- lapply(annotations, .get_gr_names, id.col = id.col)
+            if (any(vapply(feature_names_list, function(x)
+              any(duplicated(x)), logical(1)))) {
+              warning("Some features contain duplicate IDs which will result in duplicate annotations")
+            }
+            
+            for (name in names(annotations)) {
+              message(paste("Annotating with", name, "..."))
+              field_name <- paste(name, "id", sep = ".")
+              feature_names <- feature_names_list[[name]]
+              mcols.reg[[field_name]] <- NA
+              reg.ol <- findOverlaps(GIObject@regions, annotations[[name]])
+              
+              mcols.reg[[field_name]][unique(queryHits(reg.ol))] <-
+                split(feature_names[subjectHits(reg.ol)], queryHits(reg.ol))
+              
+              mcols.reg$node.class <- ifelse(is.na(mcols.reg$node.class) &
+                                              !is.na(mcols.reg[[field_name]]),
+                                            name,
+                                            mcols.reg$node.class)
+            }
+            
+            mcols.reg$node.class <- ifelse(is.na(mcols.reg$node.class),
+                                          "distal",
+                                          mcols.reg$node.class)
+            mcols(GIObject@regions) <- mcols.reg
+            assign(objName, GIObject, envir = parent.frame())
+            return(invisible(1))
+          })
 
-                feature_names_list = lapply(annotations, .get_gr_names)
-                if (any(vapply(feature_names_list, function(x) any(duplicated(x)), logical(1)))) {
-                    warning("Some features contain duplicate IDs which will result in duplicate annotations")
-                }
-
-                for(name in names(annotations)){
-                    message(paste("Annotating with", name, "..."))
-                    field_name = paste(name, "id", sep=".")
-                    feature_names = feature_names_list[[name]]
-                    mcols.reg[[field_name]] = NA
-                    reg.ol = findOverlaps(GIObject@regions, annotations[[name]])
-                    mcols.reg[[field_name]][ unique(queryHits(reg.ol)) ] <- split(feature_names[subjectHits(reg.ol)], 
-                                                                                  queryHits(reg.ol) )
-                    mcols.reg$node.class = ifelse(is.na(mcols.reg$node.class) & !is.na(mcols.reg[[field_name]]), 
-                                                  name, mcols.reg$node.class)
-                }
-
-                mcols.reg$node.class = ifelse(is.na(mcols.reg$node.class), 
-                                              "distal", mcols.reg$node.class)
-                mcols(GIObject@regions) = mcols.reg
-                assign(objName, GIObject, envir = parent.frame())
-                return(invisible(1))
-})
-
-.get_gr_names = function(x) {
+.get_gr_names = function(x, id.col = NULL) {
     if (is(x, "GRanges")) {
-        if (!is.null(names(x))) {
-            value = names(x)
-        } else if("id" %in% names(mcols(x))) {
-            value = x$id
-        } else {
-            stop("annotations requires an id column in elementMetadata or names to be non-null")
+      if (!is.null(id.col)){
+        if (!id.col %in% colnames(mcols(x))) {
+          stop("id.col `", id.col, "` not found in metadata columns")
         }
+        value <- mcols(x)[[id.col]]
+      } else if (!is.null(names(x))){
+        value <- names(x)
+      } else {
+        warning("Ranges are not named and no ID column specified; using numeric IDs")
+        value <- 1:length(x)
+      }
     } else if(is(x, "GRangesList")) {
-        value = names(x)
-    } else {
-        stop("annotations must be GRanges or GRangesList objects")
+      if (!is.null(names(x))){
+        value <- names(x)
+      } else {
+        warning("GRangesList is not named; using numeric IDs")
+        value <- 1:length(x)
+      }
+    } else{
+      stop("annotations must be GRanges or GRangesList objects")
     }
-    as.character(value)
+  return(as.character(value))
 }
