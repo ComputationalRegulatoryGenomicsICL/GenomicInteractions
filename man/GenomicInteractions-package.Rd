@@ -3,7 +3,12 @@
 \docType{package}
 \name{GenomicInteractions-package}
 \alias{GenomicInteractions-package}
-\title{GenomicInteractions: A package for analysing chromosome conformation}
+\title{GenomicInteractions}
+\description{
+Utilities for handling genomic interaction data such as
+ChIA-PET or Hi-C, annotating genomic features with interaction
+information, and producing plots and summary statistics.
+}
 \examples{
 library(GenomicInteractions)
 }
