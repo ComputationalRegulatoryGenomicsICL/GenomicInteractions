@@ -16,6 +16,6 @@ a data.frame containing all of the processed information
 In bed(n) formats interaction data cannot be stored directly due to the inability of the format to handle
 trans-interactions. It is only capable of storing cis-interactions through the use of blockStarts and blockEnds.
 As such the information is typically stored as a string of the format chr1:start1..end1-chr2:start2..end2,N
-(e.g. \"chr1:3268539..3269061-chr10:103124111..103124631,4\".). This function takes a vector of these strings
+(e.g. \'chr1:3268539..3269061-chr10:103124111..103124631,4\'.). This function takes a vector of these strings
 and converts them to a data.frame.
 }

@@ -5,7 +5,7 @@
 \alias{GenomicInteractions-class}
 \title{A S4 class to represent interactions between genomic regions.}
 \description{
-@slot metadata List, defaults to "experiment_name" and "description", inherited from S4Vectors::Vector
+@slot metadata List, defaults to 'experiment_name' and 'description', inherited from S4Vectors::Vector
  @slot anchor_one,anchor_two GRanges. Set of anchors of interactions.
  @slot counts integer vector, contains raw counts
  @slot elementMetadata DataFrame
@@ -21,11 +21,11 @@ GenomicRanges object, accessed by \code{getAnchorOne} and
 }
 \examples{
 
-showClass("GenomicInteractions")
+showClass('GenomicInteractions')
 library(GenomicRanges)
 
-anchor.one = GRanges(c("chr1", "chr1", "chr1", "chr1"), IRanges(c(10, 20, 30, 20), width=5))
-anchor.two = GRanges(c("chr1", "chr1", "chr1", "chr2"), IRanges(c(100, 200, 300, 50), width=5))
+anchor.one = GRanges(c('chr1', 'chr1', 'chr1', 'chr1'), IRanges(c(10, 20, 30, 20), width=5))
+anchor.two = GRanges(c('chr1', 'chr1', 'chr1', 'chr2'), IRanges(c(100, 200, 300, 50), width=5))
 interaction_counts = sample(1:10, 4)
 test <- GenomicInteractions(anchor.one, anchor.two, counts=interaction_counts)
 

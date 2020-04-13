@@ -2,25 +2,29 @@
 % Please edit documentation in R/InteractionTrack-class.R
 \name{availableDisplayPars}
 \alias{availableDisplayPars}
-\title{The default display parameters for a track object class can be queries using the availableDisplayPars function.}
+\title{The default display parameters for a track object class can be queries using
+the availableDisplayPars function.}
 \usage{
 availableDisplayPars(class)
 }
 \arguments{
-\item{class}{A valid track object class name, or the object itself, in which case the class is derived directly 
-from it. 
+\item{class}{A valid track object class name, or the object itself, in which
+  case the class is derived directly from it.
 
-This function provides the same functionality as \code{Gviz::availableDisplayPars} and allows the user to display 
-the default display parameters for the \code{InteractionTrack} class. If the class of the track is not an \code{InteractionTrack} then 
-the function calls the availableDisplayPars method in Gviz.}
+  This function provides the same functionality as
+  \code{Gviz::availableDisplayPars} and allows the user to display the
+  default display parameters for the \code{InteractionTrack} class. If the
+  class of the track is not an \code{InteractionTrack} then the function
+  calls the availableDisplayPars method in Gviz.}
 }
 \value{
 returns a list of the default display parameters.
 }
 \description{
-The default display parameters for a track object class can be queries using the availableDisplayPars function.
+The default display parameters for a track object class can be queries using
+the availableDisplayPars function.
 }
 \examples{
-availableDisplayPars("InteractionTrack")
+availableDisplayPars('InteractionTrack')
 
 }

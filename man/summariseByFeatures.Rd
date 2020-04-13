@@ -48,8 +48,8 @@ distances of interactions for all interactions of the feature, and for the
 different interaction types e.g. promoter-distal.
 }
 \examples{
-data("hic_example_data")
-data("mm9_refseq_promoters")
+data('hic_example_data')
+data('mm9_refseq_promoters')
 annotateInteractions(hic_example_data, list(promoter = mm9_refseq_promoters))
-summariseByFeatures(hic_example_data, mm9_refseq_promoters[1:10], "promoter")
+summariseByFeatures(hic_example_data, mm9_refseq_promoters[1:10], 'promoter')
 }

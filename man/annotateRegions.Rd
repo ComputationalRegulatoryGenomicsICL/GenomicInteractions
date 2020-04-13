@@ -22,11 +22,11 @@ containing data with which to annotate the object.}
 invisible(1)
 }
 \description{
-Use this function to add metadata parallel to the `regions` slot of a 
+Use this function to add metadata parallel to the `regions` slot of a
 GenomicInteractions or GInteractions object.
 }
 \examples{
 data(hic_example_data)
 chip <- runif(n = length(regions(hic_example_data)), max = 1000)
-annotateRegions(hic_example_data, "chip", chip)
+annotateRegions(hic_example_data, 'chip', chip)
 }

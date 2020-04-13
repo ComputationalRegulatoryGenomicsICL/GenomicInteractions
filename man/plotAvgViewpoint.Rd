@@ -6,8 +6,8 @@
 \usage{
 plotAvgViewpoint(
   x,
-  left_dist = 1e+05,
-  right_dist = 1e+05,
+  left_dist = 100000,
+  right_dist = 100000,
   ylab = "Average signal",
   xlab = "Relative position",
   fix = "center",
@@ -25,7 +25,7 @@ plotAvgViewpoint(
 
 \item{xlab}{X axis label.}
 
-\item{fix}{One of "center", "start", "end". Passed to `resize`. Interaction 
+\item{fix}{One of 'center', 'start', 'end'. Passed to `resize`. Interaction 
 distances are calculated relative to this part of the bait.}
 
 \item{...}{additional arguments to plot}
@@ -40,8 +40,8 @@ e.g. promoters. This function requires the output of `viewPoint()` as input.
 \examples{
 data(hic_example_data)
 library(GenomicRanges)
-pos <- GRanges(seqnames="chr15", ranges=IRanges(start=59477709, end=59482708))
-region <- GRanges(seqnames="chr15", ranges=IRanges(start=58980209, end=59980208))
+pos <- GRanges(seqnames='chr15', ranges=IRanges(start=59477709, end=59482708))
+region <- GRanges(seqnames='chr15', ranges=IRanges(start=58980209, end=59980208))
 vp <- viewPoint(hic_example_data, pos, region)
 plotAvgViewpoint(vp, left_dist = 1000000, right_dist = 100000)
 }

@@ -20,21 +20,22 @@
 #' @rdname export.igraph
 #' @export
 #' 
-setGeneric("export.igraph",function(GIObject){standardGeneric ("export.igraph")})
+setGeneric("export.igraph", function(GIObject) {
+    standardGeneric("export.igraph")
+})
 #' @rdname export.igraph
 #' @export
-setMethod("export.igraph", "GInteractions", function(GIObject){
-  
-  if(!is.null(names(regions(GIObject)))){
-    nodes <- names(regions(GIObject))
-  } else {
-    nodes <- as.character(regions(GIObject))
-  }
-  nodes <- data.frame(name = nodes, mcols(regions(GIObject)))
-  
-  edges <- data.frame(from = nodes$name[GIObject@anchor1],
-                      to = nodes$name[GIObject@anchor2])
-  edges <- cbind(edges, mcols(GIObject))
-  
-  return(graph_from_data_frame(edges, directed=FALSE, vertices = nodes))
+setMethod("export.igraph", "GInteractions", function(GIObject) {
+    
+    if (!is.null(names(regions(GIObject)))) {
+        nodes <- names(regions(GIObject))
+    } else {
+        nodes <- as.character(regions(GIObject))
+    }
+    nodes <- data.frame(name = nodes, mcols(regions(GIObject)))
+    
+    edges <- data.frame(from = nodes$name[GIObject@anchor1], to = nodes$name[GIObject@anchor2])
+    edges <- cbind(edges, mcols(GIObject))
+    
+    return(graph_from_data_frame(edges, directed = FALSE, vertices = nodes))
 })

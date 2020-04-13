@@ -22,8 +22,8 @@ Default: all node classes.}
 \item{viewpoints}{Optional. If set will only consider interactions where at
 least one anchor is of this node class. Default: all classes in node.classes.}
 
-\item{other}{Optional. Interaction types making up fewer than "other" percent
-of the total interactions will be consolidated into a single "other" category.}
+\item{other}{Optional. Interaction types making up fewer than 'other' percent
+of the total interactions will be consolidated into a single 'other' category.}
 
 \item{keep.order}{Optional. Logical. Keep original order of node.classes for
 plotting or not. Default: FALSE, alphabetical order.}
@@ -38,7 +38,7 @@ A ggplot2 plot
 Plot a donut plot of interaction types for an annotated GInteractions object
 }
 \examples{
-library("GenomicRanges")
+library('GenomicRanges')
 data(hic_example_data)
 data(mm9_refseq_promoters)
 mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)

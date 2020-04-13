@@ -13,8 +13,8 @@
 \item{keep.mcols}{logical whether to keep non-BED12 columns in final
 output (may cause problems with some parsers).}
 
-\item{score}{character, which field to export as "score" in BED12.
-Defaults to "auto" which will choose score, then counts,
+\item{score}{character, which field to export as 'score' in BED12.
+Defaults to 'auto' which will choose score, then counts,
 if present, or fill column with zeros.}
 
 \item{...}{Arguments to pass to methods, see \code{\link[rtracklayer]{asBED}}

@@ -17,13 +17,14 @@ countsBetweenAnchors(x, y, ...)
 
 \item{...}{Extra parameters to pass to findOverlaps}
 
-\item{ignore_overlaps}{Allow overlapping anchors. Use this when you have overlapping anchors
-but be careful with multi-mapping. The "within" option can help with this.}
+\item{ignore_overlaps}{Allow overlapping anchors. Use this when you have
+overlapping anchors but be careful with multi-mapping. The 'within' option
+can help with this.}
 }
 \value{
 A GInteractions object with annotated counts between anchors
 }
 \description{
-Calculate the number of of paired-end reads mapping between a defined set of anchors.
-This function will ignore counts present in the input data.
+Calculate the number of of paired-end reads mapping between a defined set of
+anchors. This function will ignore counts present in the input data.
 }

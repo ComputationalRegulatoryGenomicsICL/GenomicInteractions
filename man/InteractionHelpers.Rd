@@ -69,13 +69,13 @@ A logical vector
 \description{
 Functions to classify interactions within GInteractions objects.
 \itemize{
-    \item "isInteractionType" takes two character arguments which are
+    \item 'isInteractionType' takes two character arguments which are
           annotated node classes and returns interactions between them.
-    \item "is.pp", "is.pd" etc. are bindings for common annotations:
+    \item 'is.pp', 'is.pd' etc. are bindings for common annotations:
     \describe{ \item{p}{promoter}
                \item{d}{distal}
                \item{t}{terminator} }
-    \item "is.trans" & "is.cis" select trans-chromosomal and
+    \item 'is.trans' & 'is.cis' select trans-chromosomal and
           intra-chromosomal interactions, respectively }
 }
 \examples{

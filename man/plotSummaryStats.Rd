@@ -9,7 +9,7 @@ plotSummaryStats(GIObject, other = 5, cut = 10)
 \arguments{
 \item{GIObject}{A GInteractions object}
 
-\item{other}{Default 5. Passed to plotInteractionAnnotations. Interaction types making up fewer than "other" percent of the total interactions will be consolidated into a single "other" category.}
+\item{other}{Default 5. Passed to plotInteractionAnnotations. Interaction types making up fewer than 'other' percent of the total interactions will be consolidated into a single 'other' category.}
 
 \item{cut}{Default 10. Passed to plotCounts.All interactions with counts > cut are consolidated into a single category.}
 }

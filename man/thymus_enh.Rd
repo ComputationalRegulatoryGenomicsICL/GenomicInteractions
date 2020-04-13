@@ -8,7 +8,7 @@
 A GRanges object
 }
 \usage{
-data("thymus_enhancers")
+data('thymus_enhancers')
 }
 \value{
 A GRanges object

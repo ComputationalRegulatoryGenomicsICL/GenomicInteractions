@@ -22,7 +22,7 @@ A data.frame.
 Get the numbers of interaction types existing in your data
 }
 \examples{
-library("GenomicRanges")
+library('GenomicRanges')
 data(hic_example_data)
 data(mm9_refseq_promoters)
 mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)

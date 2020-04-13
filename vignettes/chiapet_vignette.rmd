@@ -1,15 +1,14 @@
-e--
-title: "Package Vignette for Genomic Interactions: ChIA-PET data"
-output: 
-  pdf_document: default
-  html_document:
-    keep_md: TRUE
 ---
-    
-<!--
-%\VignetteEngine{knitr::rmarkdown}
-%\VignetteIndexEntry{GenomicInteractions-ChIAPET}
--->
+title: "Package Vignette for Genomic Interactions: ChIA-PET data"
+author: "Malcolm Perry"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GenomicInteractions-ChIAPET}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
 
 ```{r global_chunk_opts, echo=F, include=F, eval=FALSE}
 library(knitr)

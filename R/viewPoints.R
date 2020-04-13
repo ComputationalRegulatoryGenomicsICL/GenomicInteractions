@@ -1,11 +1,11 @@
 #' Virtual 4C viewpoint
 #'
 #' This function creates a GInteractions object representing interactions 
-#' originating at a given viewpoint ("bait"), or set of viewpoints. This is 
+#' originating at a given viewpoint ('bait'), or set of viewpoints. This is 
 #' similar to the idea of a virtual 4C experiment where you are interested in 
 #' interactions with a specific region. 
 #' 
-#' The object returned has the "bait" as anchor one, and the interacting regions 
+#' The object returned has the 'bait' as anchor one, and the interacting regions 
 #' as anchor two. By default this is genome wide. If you only want to consider 
 #' interactions within a certain distance around the bait, you can specify a 
 #' region to consider.
@@ -30,25 +30,22 @@
 #' @examples
 #' data(hic_example_data)
 #' library(GenomicRanges)
-#' pos <- GRanges(seqnames="chr15", ranges=IRanges(start=59477709, end=59482708))
-#' region <- GRanges(seqnames="chr15", ranges=IRanges(start=58980209, end=59980208))
+#' pos <- GRanges(seqnames='chr15', ranges=IRanges(start=59477709, end=59482708))
+#' region <- GRanges(seqnames='chr15', ranges=IRanges(start=58980209, end=59980208))
 #' vp <- viewPoint(hic_example_data, pos, region)
-viewPoint = function(x, bait, region=NULL, ...) {
-  hits <- list()  
-  hits$one <- findOverlaps(x, bait, use.region = "first")
-  hits$two <- findOverlaps(x, bait, use.region = "second")
-  if (length(hits) == 0) return(GenomicInteractions())
-  vp <- GenomicInteractions(anchor1 = bait[c(subjectHits(hits$one), 
-                                          subjectHits(hits$two))],
-                             anchor2 = c(anchorTwo(x)[queryHits(hits$one)], 
-                                          anchorOne(x)[queryHits(hits$two)]),
-                             counts = c(interactionCounts(x)[queryHits(hits$one)], 
-                                      interactionCounts(x)[queryHits(hits$two)]))
-  if (!is.null(region)) { 
-    vp <- vp[overlapsAny(anchorTwo(vp), region, ...)] 
+viewPoint <- function(x, bait, region = NULL, ...) {
+    hits <- list()
+    hits$one <- findOverlaps(x, bait, use.region = "first")
+    hits$two <- findOverlaps(x, bait, use.region = "second")
+    if (length(hits) == 0) 
+        return(GenomicInteractions())
+    vp <- GenomicInteractions(anchor1 = bait[c(subjectHits(hits$one), subjectHits(hits$two))], anchor2 = c(anchorTwo(x)[queryHits(hits$one)], 
+        anchorOne(x)[queryHits(hits$two)]), counts = c(interactionCounts(x)[queryHits(hits$one)], interactionCounts(x)[queryHits(hits$two)]))
+    if (!is.null(region)) {
+        vp <- vp[overlapsAny(anchorTwo(vp), region, ...)]
     }
-  ord = order(vp)
-  return(unique(vp[ord]))
+    ord <- order(vp)
+    return(unique(vp[ord]))
 }
 
 #' Plot coverage around a virtual 4C viewpoint
@@ -69,8 +66,8 @@ viewPoint = function(x, bait, region=NULL, ...) {
 #' @examples
 #' data(hic_example_data)
 #' library(GenomicRanges)
-#' pos <- GRanges(seqnames="chr15", ranges=IRanges(start=59477709, end=59482708))
-#' region <- GRanges(seqnames="chr15", ranges=IRanges(start=58980209, end=59980208))
+#' pos <- GRanges(seqnames='chr15', ranges=IRanges(start=59477709, end=59482708))
+#' region <- GRanges(seqnames='chr15', ranges=IRanges(start=58980209, end=59980208))
 #' vp <- viewPoint(hic_example_data, pos, region)
 #' plotViewpoint(vp, region)
 #'
@@ -78,20 +75,20 @@ viewPoint = function(x, bait, region=NULL, ...) {
 #' @importFrom graphics plot
 #' @export
 #' 
-plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
-    if (length(region) > 1) stop("region must be a single range")
-    x = x[overlapsAny(anchorTwo(x), region, type="within")]
-    cov = as(coverage(anchorTwo(x), weight = interactionCounts(x))[region], "GRanges")
-    points_x = c(start(cov), end(cov)) + start(region)
-    points_y = rep.int(cov$score, 2)
-    ord = order(points_x)
+plotViewpoint <- function(x, region, ylab = "Signal", xlab = NULL, ...) {
+    if (length(region) > 1) 
+        stop("region must be a single range")
+    x <- x[overlapsAny(anchorTwo(x), region, type = "within")]
+    cov <- as(coverage(anchorTwo(x), weight = interactionCounts(x))[region], "GRanges")
+    points_x <- c(start(cov), end(cov)) + start(region)
+    points_y <- rep.int(cov$score, 2)
+    ord <- order(points_x)
     
-    if(is.null(xlab)){ 
-    xlab <- as.character(seqnames(region))
+    if (is.null(xlab)) {
+        xlab <- as.character(seqnames(region))
     }
     
-    plot(points_x[ord], points_y[ord], t="l", 
-             ylab = ylab, xlab = xlab, ...)
+    plot(points_x[ord], points_y[ord], t = "l", ylab = ylab, xlab = xlab, ...)
     
     return(invisible(coverage(cov, weight = "score")))
 }
@@ -104,7 +101,7 @@ plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
 #' @param x A GInteractions object which is output from viewPoint
 #' @param left_dist Distance 'left' of interactions to consider, in bp.
 #' @param right_dist Distance 'right' of interactions to consider, in bp.
-#' @param fix One of "center", "start", "end". Passed to `resize`. Interaction 
+#' @param fix One of 'center', 'start', 'end'. Passed to `resize`. Interaction 
 #' distances are calculated relative to this part of the bait. 
 #' @param ylab Y axis label.
 #' @param xlab X axis label. 
@@ -115,41 +112,39 @@ plotViewpoint = function(x, region, ylab="Signal", xlab=NULL, ...) {
 #' @examples
 #' data(hic_example_data)
 #' library(GenomicRanges)
-#' pos <- GRanges(seqnames="chr15", ranges=IRanges(start=59477709, end=59482708))
-#' region <- GRanges(seqnames="chr15", ranges=IRanges(start=58980209, end=59980208))
+#' pos <- GRanges(seqnames='chr15', ranges=IRanges(start=59477709, end=59482708))
+#' region <- GRanges(seqnames='chr15', ranges=IRanges(start=58980209, end=59980208))
 #' vp <- viewPoint(hic_example_data, pos, region)
 #' plotAvgViewpoint(vp, left_dist = 1000000, right_dist = 100000)
 #' @import GenomicRanges
 #' @importFrom S4Vectors runValue
 #' @export
-plotAvgViewpoint = function(x, left_dist = 100000, right_dist = 100000, ylab="Average signal", 
-                            xlab="Relative position", fix = "center",...) {
-  
-  cov <- .makeRelativeVP(x, fix = fix, left_dist = left_dist, right_dist = right_dist )
-  
-  points_x = c(start(cov), end(cov)) - left_dist
-  points_y = rep.int(runValue(cov), 2)
-  ord = order(points_x)
-  
-  p = plot(points_x[ord], points_y[ord], t="l", 
-           ylab = ylab, xlab = xlab, ...)
-  
-  return(invisible(cov))
+plotAvgViewpoint <- function(x, left_dist = 100000, right_dist = 100000, ylab = "Average signal", xlab = "Relative position", fix = "center", 
+    ...) {
+    
+    cov <- .makeRelativeVP(x, fix = fix, left_dist = left_dist, right_dist = right_dist)
+    
+    points_x <- c(start(cov), end(cov)) - left_dist
+    points_y <- rep.int(runValue(cov), 2)
+    ord <- order(points_x)
+    
+    p <- plot(points_x[ord], points_y[ord], t = "l", ylab = ylab, xlab = xlab, ...)
+    
+    return(invisible(cov))
 }
 
-.makeRelativeVP <- function(GIObject, fix = "center", left_dist = 100000, right_dist = 100000){
-  #make ranges relative to bait
-  bait <- resize(anchorOne(GIObject), width = 1, fix = fix)
-  ints <- ranges(anchorTwo(GIObject))
-  ints <- GenomicRanges::shift(ints, shift = -(start(bait)))
-  ints <- GenomicRanges::shift(ints, shift = left_dist)
-  
-  #make coverage and adjust to mean coverage per bait
-  cov <- coverage(ints, weight = interactionCounts(GIObject), 
-                  width = right_dist+left_dist)
-  cov <- cov / length(unique(bait))
-  
-  return(cov)
-  #get points to plot
-  
+.makeRelativeVP <- function(GIObject, fix = "center", left_dist = 100000, right_dist = 100000) {
+    # make ranges relative to bait
+    bait <- resize(anchorOne(GIObject), width = 1, fix = fix)
+    ints <- ranges(anchorTwo(GIObject))
+    ints <- GenomicRanges::shift(ints, shift = -(start(bait)))
+    ints <- GenomicRanges::shift(ints, shift = left_dist)
+    
+    # make coverage and adjust to mean coverage per bait
+    cov <- coverage(ints, weight = interactionCounts(GIObject), width = right_dist + left_dist)
+    cov <- cov/length(unique(bait))
+    
+    return(cov)
+    # get points to plot
+    
 }

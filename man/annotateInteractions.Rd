@@ -16,7 +16,8 @@ annotateInteractions(GIObject, annotations, id.col = NULL)
 \item{annotations}{A list containing GRanges (or GRangesList) objects with
 which to annotate the GInteractions object.}
 
-\item{id.col}{}
+\item{id.col}{Metadata column of GRanges objects to use as feature ID.
+Default: NULL.}
 }
 \value{
 invisible(1)
@@ -30,7 +31,7 @@ objects.
 Metadata columns will be added to the regions of the GInteractions object,
 named according to the names of `annotations` and containing the id(s) of the
 corresponding overlapping genomic interval(s). If `annotations` is not named,
-the metadata columns will be named "FEATURE#.id" where # is the position in
+the metadata columns will be named 'FEATURE#.id' where # is the position in
 the list.
 
 IDs for features in each element of annotations will be extracted according
@@ -40,17 +41,18 @@ feature IDs. Otherwise, if the annotation features are named, their names
 will be used. If neither of these are present, they will be given numeric
 IDs.
 
-For each anchor a "node.class" metadata column will also be added, containing
+For each anchor a 'node.class' metadata column will also be added, containing
 the name of the list element which was \emph{first} annotated to each range.
-Ranges with no overlaps will be classified as "distal".
+Ranges with no overlaps will be classified as 'distal'.
 }
 \examples{
 
-library("GenomicRanges")
+library('GenomicRanges')
 data(hic_example_data)
 data(mm9_refseq_promoters)
 mm9_refseq_grl = split(mm9_refseq_promoters, mm9_refseq_promoters$id)
 # This adds a `promoter.id` metadata column to regions(hic_example_data)
-# containing IDs of overlapping promoters for each region, taken from names(mm9_refseq_grl)
+# containing IDs of overlapping promoters for each region, taken from
+# names(mm9_refseq_grl)
 annotateInteractions(hic_example_data, list(promoter=mm9_refseq_grl))
 }

@@ -65,7 +65,7 @@ NULL
 #' @name thymus_enh
 #' @docType data
 #' @keywords datasets
-#' @usage data("thymus_enhancers")
+#' @usage data('thymus_enhancers')
 #' @format A GRanges object
 #' @return A GRanges object
 #' @references Shen, Y et al. A map of cis-regulatory sequences in the mouse genome. Nature (2012).

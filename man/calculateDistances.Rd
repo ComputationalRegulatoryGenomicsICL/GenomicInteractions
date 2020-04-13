@@ -13,32 +13,35 @@ calculateDistances(GIObject, method = "midpoint", floor = TRUE)
 \arguments{
 \item{GIObject}{A GInteractions object}
 
-\item{method}{Character vector indicating how to calculate distances, must
-be one of `midpoint', `outer', `inner'.}
+\item{method}{Character vector indicating how to calculate distances, must be
+one of `midpoint', `outer', `inner'.}
 
-\item{floor}{A logical specifying whether to round down distances to nearest 
+\item{floor}{A logical specifying whether to round down distances to nearest
 base pair or not. Default TRUE.}
 }
 \value{
-An vector containing the distances between anchors/GRanges,
-        NA if on different chromosomes, rounded down to the nearest bp.
+An vector containing the distances between anchors/GRanges, NA if on
+  different chromosomes, rounded down to the nearest bp.
 }
 \description{
 This function takes a GInteractions object and calculates the distances
-between the anchors according to the value of \code{method}. The distances returned
-follow the same convention as distance(x, y) in GenomicRanges where the
-distance between adjacent regions is 0. Note that if anchors are overlapping
-this method will print a warning and return the distance as 0.
+between the anchors according to the value of \code{method}. The distances
+returned follow the same convention as distance(x, y) in GenomicRanges where
+the distance between adjacent regions is 0. Note that if anchors are
+overlapping this method will print a warning and return the distance as 0.
 }
 \examples{
 
 library(GenomicRanges)
 
-anchor.one = GRanges(c("chr1", "chr1", "chr1", "chr1"), IRanges(c(10, 20, 30, 20), width=5))
-anchor.two = GRanges(c("chr1", "chr1", "chr1", "chr2"), IRanges(c(100, 200, 300, 50), width=5))
-interaction_counts = sample(1:10, 4)
-test <- GenomicInteractions(anchor.one, anchor.two, experiment_name="test", 
-                           description="this is a test", counts=interaction_counts)
-calculateDistances(test, method="midpoint")
-        
+anchor.one <- GRanges(c('chr1', 'chr1', 'chr1', 'chr1'), 
+  IRanges(c(10, 20, 30, 20), width = 5))
+anchor.two <- GRanges(c('chr1', 'chr1', 'chr1', 'chr2'), 
+  IRanges(c(100, 200, 300, 50), width = 5))
+interaction_counts <- sample(1:10, 4)
+test <- GenomicInteractions(anchor.one, anchor.two, experiment_name = 'test',
+                           description = 'this is a test',
+                           counts = interaction_counts)
+calculateDistances(test, method = 'midpoint')
+
 }

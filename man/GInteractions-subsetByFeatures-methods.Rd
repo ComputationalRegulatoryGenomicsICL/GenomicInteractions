@@ -19,22 +19,23 @@ subsetByFeatures(GIObject, features, feature.class = NULL)
 \arguments{
 \item{GIObject}{A GInteractions object}
 
-\item{features}{A GRanges or GRangesList object, or a character vector containing
-IDs of annotated features, e.g. promoter IDs.}
+\item{features}{A GRanges or GRangesList object, or a character vector
+containing IDs of annotated features, e.g. promoter IDs.}
 
-\item{feature.class}{If `features' is a character vector, the corresponding feature name, e.g. "promoter".}
+\item{feature.class}{If `features' is a character vector, the corresponding
+feature name, e.g. 'promoter'.}
 }
 \value{
 a subsetted GInteractions object
 }
 \description{
-Subsets interactions for which at least one of the anchors overlaps with a given GRanges object.
-Alternatively, subsets interactions based on annotated feature IDs for a particular feature.
+Subsets interactions for which at least one of the anchors overlaps with a
+given GRanges object. Alternatively, subsets interactions based on annotated
+feature IDs for a particular feature.
 }
 \examples{
-data("hic_example_data")
-data("mm9_refseq_promoters")
-annotateInteractions(hic_example_data, list(promoter = mm9_refseq_promoters))
+data('hic_example_data')
+data('mm9_refseq_promoters')
 ids <- names(mm9_refseq_promoters[1:10])
-subsetByFeatures(hic_example_data, ids, "promoter")
+subsetByFeatures(hic_example_data, ids, 'promoter')
 }

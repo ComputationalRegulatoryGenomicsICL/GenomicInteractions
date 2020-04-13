@@ -13,9 +13,9 @@ makeGenomicInteractionsFromFile(
 )
 }
 \arguments{
-\item{fn}{Filename or, if type="hiclib", folder}
+\item{fn}{Filename or, if type='hiclib', folder}
 
-\item{type}{One of "chiapet.tool", "bed12", "bedpe", "hiclib", "homer", "bam", "two.bams".}
+\item{type}{One of 'chiapet.tool', 'bed12', 'bedpe', 'hiclib', 'homer', 'bam', 'two.bams'.}
 
 \item{experiment_name}{Experiment name.}
 
@@ -33,7 +33,7 @@ It is also possible to store information on associated p-values and false-discov
 It is possible to create GenomicInteractions objects for various datasets including Hi-C and ChIA-PET. It is possible
 to read interactions from a variety of files including BAM files, bed files (BED12 and BEDPE) and from the output
 from standard processing pipelines, such as HOMER and ChIA-PET tool. GenomicInteractions objects can also be created
-using calls of the form \code{new("GenomicInteractions", ...)}. For hiclib, it expects the directory in which the files
+using calls of the form \code{new('GenomicInteractions', ...)}. For hiclib, it expects the directory in which the files
 extracted using h5dictToTxt.py from the hdf5 file are located, where as for all of the other file types it expects the full
 filename. Note that recent versions of hiclib (2015-) cannot export the required data and so this function will only work with
 older files. Hiclib support will be removed in the next version of GenomicInteractions.
@@ -41,8 +41,8 @@ older files. Hiclib support will be removed in the next version of GenomicIntera
 \examples{
 
 k562.rep1 <- makeGenomicInteractionsFromFile(
-       system.file(package="GenomicInteractions", "extdata", "k562.rep1.cluster.pet3+.txt"),
-       type="chiapet.tool", experiment_name="k562", description="k562 pol2 8wg16")
+       system.file(package='GenomicInteractions', 'extdata', 'k562.rep1.cluster.pet3+.txt'),
+       type='chiapet.tool', experiment_name='k562', description='k562 pol2 8wg16')
 
 k562.rep1
 

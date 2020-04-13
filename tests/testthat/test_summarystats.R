@@ -26,11 +26,11 @@ test_that("categoriseInteraction returns correct result", {
   expect_equal(categoriseInteractions(gi, node.classes = "promoter"), res[1,])
 })
 
-test_that("plotSummaryStats works as previously", {
-  expect_equal_to_reference(plotSummaryStats(gi), 
-                            file = "plotsummarystats.rds")
-  resetAnnotations(gi)
-  expect_equal_to_reference(plotSummaryStats(gi), 
-                            file = "plotsummarystats_reset.rds")
-})
+# test_that("plotSummaryStats works as previously", {
+#   expect_equal_to_reference(plotSummaryStats(gi), 
+#                             file = "plotsummarystats.rds")
+#   resetAnnotations(gi)
+#   expect_equal_to_reference(plotSummaryStats(gi), 
+#                             file = "plotsummarystats_reset.rds")
+# })
 

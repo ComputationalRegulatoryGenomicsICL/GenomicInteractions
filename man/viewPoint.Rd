@@ -21,12 +21,12 @@ A GInteractions object.
 }
 \description{
 This function creates a GInteractions object representing interactions 
-originating at a given viewpoint ("bait"), or set of viewpoints. This is 
+originating at a given viewpoint ('bait'), or set of viewpoints. This is 
 similar to the idea of a virtual 4C experiment where you are interested in 
 interactions with a specific region.
 }
 \details{
-The object returned has the "bait" as anchor one, and the interacting regions 
+The object returned has the 'bait' as anchor one, and the interacting regions 
 as anchor two. By default this is genome wide. If you only want to consider 
 interactions within a certain distance around the bait, you can specify a 
 region to consider.
@@ -40,7 +40,7 @@ as a wig or bedgraph file.
 \examples{
 data(hic_example_data)
 library(GenomicRanges)
-pos <- GRanges(seqnames="chr15", ranges=IRanges(start=59477709, end=59482708))
-region <- GRanges(seqnames="chr15", ranges=IRanges(start=58980209, end=59980208))
+pos <- GRanges(seqnames='chr15', ranges=IRanges(start=59477709, end=59482708))
+region <- GRanges(seqnames='chr15', ranges=IRanges(start=58980209, end=59980208))
 vp <- viewPoint(hic_example_data, pos, region)
 }

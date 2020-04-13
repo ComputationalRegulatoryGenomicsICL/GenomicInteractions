@@ -8,6 +8,4 @@
 #' @rdname GenomicInteractions-package
 #' @docType package
 #' @import methods
-#' @examples
-#' library(GenomicInteractions)
 NULL

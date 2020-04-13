@@ -1,15 +1,13 @@
 ---
 title: "HiC vignette for GenomicInteractions package"
-output:
-  html_document:
-    keep_md: yes
-  pdf_document: default
+author: "Liz Ing-Simmons"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GenomicInteractions-HiC}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
-
-<!--
-%\VignetteEngine{knitr::rmarkdown}
-%\VignetteIndexEntry{GenomicInteractions-HiC}
--->
 
 ```{r options, echo=FALSE}
 options("scipen"=10, "digits"=5)

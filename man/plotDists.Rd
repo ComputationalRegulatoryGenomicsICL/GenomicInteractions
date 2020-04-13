@@ -6,7 +6,7 @@
 \usage{
 plotDists(
   GIObject,
-  breaks = c(0, 1000, 5000, 10000, 50000, 1e+05, 5e+05, 1e+06, 2e+06),
+  breaks = c(0, 1000, 5000, 10000, 50000, 100000, 500000, 1000000, 2000000),
   method = "midpoint"
 )
 }
@@ -15,7 +15,7 @@ plotDists(
 
 \item{breaks}{A numeric vector of breaks for the histogram}
 
-\item{method}{Method used for distance between anchors. Passed to calculateDistances. One of "midpoint", "inner", or "outer".}
+\item{method}{Method used for distance between anchors. Passed to calculateDistances. One of 'midpoint', 'inner', or 'outer'.}
 }
 \value{
 A ggplot2 plot

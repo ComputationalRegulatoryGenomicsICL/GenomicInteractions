@@ -7,7 +7,7 @@
 get_self_ligation_threshold(
   GIObject,
   bins = 100,
-  distance_th = 4e+05,
+  distance_th = 400000,
   plot = TRUE
 )
 }
@@ -16,21 +16,21 @@ get_self_ligation_threshold(
 
 \item{bins}{Number of evenly sized bins to use.}
 
-\item{distance_th}{The threshold, in base pairs, to use as a cutoff to 
-pick which bins to use to determine the standard deviation.}
+\item{distance_th}{The threshold, in base pairs, to use as a cutoff to pick
+which bins to use to determine the standard deviation.}
 
-\item{plot}{TRUE by default. Whether to plot the log2ratio of opposite
-to same strand reads vs distance.}
+\item{plot}{TRUE by default. Whether to plot the log2ratio of opposite to
+same strand reads vs distance.}
 }
 \value{
-The cutoff in base pairs below which an interaction is likely to be a self ligation.
+The cutoff in base pairs below which an interaction is likely to be a
+  self ligation.
 }
 \description{
-This function calculates a self ligation threshold according to 
-the method published in Heidari et al., Genome Research, 2014. 
-Briefly, paired reads are divided into in evenly sized bins. For
-each bin, the log2 ratio of reads that are aligned to opposite strand
-vs to the same strand is calculated. Twice the standard deviation of 
-this ratio at high distances is used a cutoff to determine which bins 
-are likely to contain mostly self-liagted reads.
+This function calculates a self ligation threshold according to the method
+published in Heidari et al., Genome Research, 2014. Briefly, paired reads are
+divided into in evenly sized bins. For each bin, the log2 ratio of reads that
+are aligned to opposite strand vs to the same strand is calculated. Twice the
+standard deviation of this ratio at high distances is used a cutoff to
+determine which bins are likely to contain mostly self-liagted reads.
 }

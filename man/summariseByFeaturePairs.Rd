@@ -43,9 +43,9 @@ of the number of features of a specific type a particular region is involved in
 and how many interactions exist between them.
 }
 \examples{
-data("hic_example_data")
-data("mm9_refseq_promoters")
-data("thymus_enhancers")
+data('hic_example_data')
+data('mm9_refseq_promoters')
+data('thymus_enhancers')
 annotateInteractions(hic_example_data, list(promoter = mm9_refseq_promoters, enhancer = thymus_enh))
 # can be slow so subset of features used for examples
 p <- unique(unlist(head(regions(hic_example_data)$promoter.id)))
@@ -54,5 +54,5 @@ p <- p[!is.na(p)]
 p <- mm9_refseq_promoters[p]
 e <- e[!is.na(e)]
 e <- thymus_enh[e]
-ep_summary <- summariseByFeaturePairs(hic_example_data, p, "promoter", e, "enhancer")
+ep_summary <- summariseByFeaturePairs(hic_example_data, p, 'promoter', e, 'enhancer')
 }
