@@ -2,7 +2,7 @@ Package: GenomicInteractions
 Type: Package
 Title: Utilities for handling genomic interaction data
 URL: https://github.com/ComputationalRegulatoryGenomicsICL/GenomicInteractions/
-Version: 1.25.0
+Version: 1.25.1
 Date: 2019-12-08
 Author: Harmston, N., Ing-Simmons, E., Perry, M., Baresic, A., Lenhard,
     B.
@@ -31,6 +31,7 @@ Imports:
     grDevices
 Suggests:
     knitr,
+    rmarkdown,
     BiocStyle,
     testthat
 VignetteBuilder: knitr
