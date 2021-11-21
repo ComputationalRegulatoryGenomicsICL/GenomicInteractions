@@ -21,7 +21,7 @@
 #' @importFrom Rsamtools scanBamFlag ScanBamParam scanBam bamFlagAsBitMatrix
 #' @importFrom IRanges IRanges
 #' @importFrom data.table data.table fread .N
-#' @importFrom S4Vectors first second
+#' @importFrom S4Vectors first second make_zero_col_DFrame
 #'
 #' @examples
 #'
@@ -112,7 +112,7 @@ makeGenomicInteractionsFromFile <- function(fn, type, experiment_name = "", desc
     }
     
     if (is.null(em)) {
-        em <- new("DataFrame", nrows = length(anchor_one))
+        em <- make_zero_col_DFrame(length(anchor_one))
     }
     
     giobject <- GenomicInteractions(anchor_one, anchor_two, counts = counts, metadata = list(experiment_name = experiment_name, description = description), 
