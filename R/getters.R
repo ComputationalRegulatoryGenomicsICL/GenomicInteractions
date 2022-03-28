@@ -27,7 +27,7 @@
 #' anchorOne(test)
 #' anchorTwo(test)
 #' interactionCounts(test)
-#'
+
 ## GENERICS
 
 #' @rdname getters

@@ -6,8 +6,8 @@
 \usage{
 plotAvgViewpoint(
   x,
-  left_dist = 100000,
-  right_dist = 100000,
+  left_dist = 1e+05,
+  right_dist = 1e+05,
   ylab = "Average signal",
   xlab = "Relative position",
   fix = "center",

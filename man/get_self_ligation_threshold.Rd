@@ -7,7 +7,7 @@
 get_self_ligation_threshold(
   GIObject,
   bins = 100,
-  distance_th = 400000,
+  distance_th = 4e+05,
   plot = TRUE
 )
 }
