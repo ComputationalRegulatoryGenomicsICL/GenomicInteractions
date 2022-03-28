@@ -1,11 +1,20 @@
 ## Definition of InteractionTrack
 
-#' A class to hold chromatin interaction data for a specific genomic region.
+#' A class to hold chromatin interaction data for a specific genomic region
 #'
-#'  @slot plottingFunction function
-#'  @slot variables list
-#'  @slot chromosome chromosome
+#'  @slot giobject GenomicInteractions object from which the object was created
+#'  
+#'  @slot variables list of chromosome, start, and end. Start and end can be NULL
+#'  
+#'  @slot chromosome chromosome defined for the object
+#'  
 #'  @slot stacking character
+#'  
+#'  @slot dp DisplayPars for the object, access with `availableDisplayPars()`
+#'  
+#'  @slot name Object name
+#'  
+#'  @slot imageMap NULL
 #'
 #' InteractionTrack is a specific Gviz-derived class for enabling the
 #' visualisation of chromatin interaction data. The InteractionTrack class
@@ -48,6 +57,7 @@
 #'
 #' @import Gviz
 #' @import grid
+#' @importFrom BiocGenerics which
 #' @importFrom stringr str_split
 #'
 #' @export InteractionTrack
@@ -91,29 +101,37 @@ setMethod("initialize", "InteractionTrack", function(.Object, giobject, chromoso
     return(.Object)
 })
 
+#' @export
+#' @describeIn InteractionTrack-class Extract stored start position for object or, if that is NULL, minimum of region starts.
 setMethod("start", "InteractionTrack", function(x) {
-    if (!is.null(x@variables$start)) {
+    if (is.null(x@variables$start)) {
         tmp.start <-
-            min(c(start(anchorOne(x@giobject))[seqnames(anchorOne(x@giobject)) == x@chromosome], 
-                  start(anchorTwo(x@giobject))[seqnames(anchorTwo(x@giobject)) == x@chromosome]))
+            min(c(start(anchorOne(x@giobject))[which(seqnames(anchorOne(x@giobject)) == x@chromosome)], 
+                  start(anchorTwo(x@giobject))[which(seqnames(anchorTwo(x@giobject)) == x@chromosome)]))
     } else {
         return(x@variables$start)
     }
     return(tmp.start)
 })
 
+#' @export
+#' @describeIn InteractionTrack-class Extract stored end position for object or, if that is NULL, maximum of region ends.
 setMethod("end", "InteractionTrack", function(x) {
-    if (!is.null(x@variables$end)) {
-        tmp.end <- max(c(end(anchorOne(x@giobject))[seqnames(anchorOne(x@giobject)) == x@chromosome], 
-                         end(anchorTwo(x@giobject))[seqnames(anchorTwo(x@giobject)) == x@chromosome]))
+    if (is.null(x@variables$end)) {
+        tmp.end <- max(c(end(anchorOne(x@giobject))[which(seqnames(anchorOne(x@giobject)) == x@chromosome)], 
+                         end(anchorTwo(x@giobject))[which(seqnames(anchorTwo(x@giobject)) == x@chromosome)]))
     } else {
-        return(x@variables$start)
+        return(x@variables$end)
     }
     return(tmp.end)
 })
 
+#' @export
+#' @describeIn InteractionTrack-class Extract stored chromosome of object
 setMethod("chromosome", "InteractionTrack", function(GdObject) GdObject@chromosome)
 
+#' @export
+#' @describeIn InteractionTrack-class Subset the object to only contain interactions within the specified genomic region
 setMethod("subset", signature(x = "InteractionTrack"), function(x, from, to, chromosome, ...) {
     x@chromosome <- chromosome
     x@giobject <- subsetByFeatures(x@giobject, GRanges(chromosome, IRanges(from, to)))

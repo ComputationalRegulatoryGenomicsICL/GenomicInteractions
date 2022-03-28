@@ -3,12 +3,34 @@
 \docType{class}
 \name{InteractionTrack-class}
 \alias{InteractionTrack-class}
-\title{A class to hold chromatin interaction data for a specific genomic region.}
+\alias{start,InteractionTrack-method}
+\alias{end,InteractionTrack-method}
+\alias{chromosome,InteractionTrack-method}
+\alias{subset,InteractionTrack-method}
+\title{A class to hold chromatin interaction data for a specific genomic region}
+\usage{
+\S4method{start}{InteractionTrack}(x)
+
+\S4method{end}{InteractionTrack}(x)
+
+\S4method{chromosome}{InteractionTrack}(GdObject)
+
+\S4method{subset}{InteractionTrack}(x, from, to, chromosome, ...)
+}
 \description{
-@slot plottingFunction function
- @slot variables list
- @slot chromosome chromosome
+@slot giobject GenomicInteractions object from which the object was created
+ 
+ @slot variables list of chromosome, start, and end. Start and end can be NULL
+ 
+ @slot chromosome chromosome defined for the object
+ 
  @slot stacking character
+ 
+ @slot dp DisplayPars for the object, access with `availableDisplayPars()`
+ 
+ @slot name Object name
+ 
+ @slot imageMap NULL
 }
 \details{
 InteractionTrack is a specific Gviz-derived class for enabling the
@@ -49,3 +71,14 @@ This is applicable to anchors regions through the use of the
 \code{col.anchors.line.node.class} and \code{col.anchors.fill.node.class}
 parameters.
 }
+\section{Functions}{
+\itemize{
+\item \code{start,InteractionTrack-method}: Extract stored start position for object or, if that is NULL, minimum of region starts.
+
+\item \code{end,InteractionTrack-method}: Extract stored end position for object or, if that is NULL, maximum of region ends.
+
+\item \code{chromosome,InteractionTrack-method}: Extract stored chromosome of object
+
+\item \code{subset,InteractionTrack-method}: Subset the object to only contain interactions within the specified genomic region
+}}
+
