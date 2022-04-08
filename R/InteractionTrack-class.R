@@ -59,7 +59,14 @@
 #' @import grid
 #' @importFrom BiocGenerics which
 #' @importFrom stringr str_split
-#'
+#' 
+#' @param x An InteractionTrack object
+#' @param GdObject An InteractionTrack object
+#' @param from Integer start coordinate of subset region
+#' @param to Integer end coordinate of subset region
+#' @param chromosome Chromosome of subset region
+#' @param ... additional arguments are ignored.
+#' 
 #' @export InteractionTrack
 setClass(
     "InteractionTrack",

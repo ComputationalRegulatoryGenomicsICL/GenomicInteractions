@@ -17,6 +17,19 @@
 
 \S4method{subset}{InteractionTrack}(x, from, to, chromosome, ...)
 }
+\arguments{
+\item{x}{An InteractionTrack object}
+
+\item{GdObject}{An InteractionTrack object}
+
+\item{from}{Integer start coordinate of subset region}
+
+\item{to}{Integer end coordinate of subset region}
+
+\item{chromosome}{Chromosome of subset region}
+
+\item{...}{additional arguments are ignored.}
+}
 \description{
 @slot giobject GenomicInteractions object from which the object was created
  
