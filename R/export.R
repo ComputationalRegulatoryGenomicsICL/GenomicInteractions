@@ -37,7 +37,7 @@ setMethod("export.bed12", c("GInteractions"), function(GIObject, fn = NULL, scor
         bed$blocks <- NULL
         strand_info <- as.character(strand(bed))
         strand_info[strand_info == "*"] <- NA
-        df <- data.frame(seqnames = seqnames(bed), start = start(bed) - 1, end = end(bed), names = bed$name, score = bed$score, strand = strand_info, 
+        df <- data.frame(seqnames = seqnames(bed), start = start(bed) - 1L, end = end(bed), names = bed$name, score = bed$score, strand = strand_info, 
             thickStart = bed$thickStart, thickEnd = bed$thickEnd, itemRgb = apply(col2rgb(bed$itemRgb), 2, paste, collapse = ","), blockCount = elementNROWS(blocks), 
             blockStarts = unlist(lapply(start(blocks), paste, collapse = ","), use.names = FALSE), blockSizes = unlist(lapply(width(blocks), 
                 paste, collapse = ","), use.names = FALSE))
@@ -73,8 +73,8 @@ setMethod("export.bedpe", c("GInteractions"), function(GIObject, fn = NULL, scor
     score_vector <- .getScore(GIObject, score)
     if (is.null(score_vector)) 
         stop("Supplied score field not in element metadata.")
-    output <- cbind(as.character(seqnames(anchorOne(GIObject))), start(anchorOne(GIObject)) - 1, end(anchorOne(GIObject)), as.character(seqnames(anchorTwo(GIObject))), 
-        start(anchorTwo(GIObject)) - 1, end(anchorTwo(GIObject)), paste0("interaction:", seq_along(GIObject)), score_vector, as.character(strand(anchorOne(GIObject))), 
+    output <- cbind(as.character(seqnames(anchorOne(GIObject))), start(anchorOne(GIObject)) - 1L, end(anchorOne(GIObject)), as.character(seqnames(anchorTwo(GIObject))), 
+        start(anchorTwo(GIObject)) - 1L, end(anchorTwo(GIObject)), paste0("interaction:", seq_along(GIObject)), score_vector, as.character(strand(anchorOne(GIObject))), 
         as.character(strand(anchorTwo(GIObject))))
     
     if (!is.null(fn)) {
@@ -116,8 +116,8 @@ setMethod("export.chiasig", c("GInteractions"), function(GIObject, fn = NULL, sc
     score_vec <- .getScore(GIObject, score)
     if (is.null(score_vec)) 
         stop("Supplied score field not in element metadata.")
-    output <- cbind(as.character(seqnames(anchorOne(GIObject))), start(anchorOne(GIObject)) - 1, end(anchorOne(GIObject)), as.character(seqnames(anchorTwo(GIObject))), 
-        start(anchorTwo(GIObject)) - 1, score_vec)
+    output <- cbind(as.character(seqnames(anchorOne(GIObject))), start(anchorOne(GIObject)) - 1L, end(anchorOne(GIObject)), as.character(seqnames(anchorTwo(GIObject))), 
+        start(anchorTwo(GIObject)) - 1L, score_vec)
     
     if (!is.null(fn)) {
         write.table(output, fn, sep = "\t", col.names = FALSE, quote = FALSE, row.names = FALSE)
@@ -216,6 +216,6 @@ setMethod("asBED", c("GInteractions"), function(x, keep.mcols = FALSE, score = "
 })
 
 .exportName <- function(gi, score = 0) {
-    paste0(seqnames(gi@regions)[gi@anchor1], ":", start(gi@regions)[gi@anchor1] - 1, "..", end(gi@regions)[gi@anchor1], "-", seqnames(gi@regions)[gi@anchor2], 
-        ":", start(gi@regions)[gi@anchor2] - 1, "..", end(gi@regions)[gi@anchor2], ",", score)
+    paste0(seqnames(gi@regions)[gi@anchor1], ":", start(gi@regions)[gi@anchor1] - 1L, "..", end(gi@regions)[gi@anchor1], "-", seqnames(gi@regions)[gi@anchor2], 
+        ":", start(gi@regions)[gi@anchor2] - 1L, "..", end(gi@regions)[gi@anchor2], ",", score)
 }
